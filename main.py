@@ -19,18 +19,12 @@ def parse_line(line: str):
     result = []
 
     for i in line:
-        if i not in SPEC_CHR:
-            cur_string+=i 
-            continue
-        elif i == " ":
+        if i in SPEC_CHR:
             result.append(cur_string)
             cur_string = ""
+            result.append(i)
             continue
-        elif i == "=":
-            result.append(cur_string)
-            cur_string = ""
-            result.append('=')
-            continue
+        cur_string+=i
     result.append(cur_string)
     for d, i in enumerate(result):
         if not i:
