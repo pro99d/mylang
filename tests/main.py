@@ -65,34 +65,38 @@ variables = {}  # имя: Variable
  
 """
 
-
+class Keyword:
+    pass
 class Expression:
     # TODO реализовать вложенные выражения
-    def __init__(self, value: str, expr_type: str) -> None:
+    def __init__(self, value: str, expr_subtype: str, expr_type: str= "bin") -> None:
         self.expr = value
         self.expr_type = expr_type
+        self.expr_subtype = expr_subtype
 
     def find_result(self):
         match self.expr_type:
-            case "set":
-                e = self.expr.split("=")
-                set_var = e[0]
-                set_value = e[1]
+            case "bin":
+                match self.expr_subtype:
+                    case "set":
+                        e = self.expr.split("=")
+                        set_var = e[0]
+                        set_value = e[1]
 
-                if is_string(set_value):
-                    set_type = str
-                    set_value = set_value[1:-1]
-                elif set_value.isnumeric and '.' not in set_value:
-                    set_type = int
-                elif re.fullmatch(Patterns.float_pattern, set_value):
-                    set_type = float
-                else:
-                    set_type = type(set_value)
-                print(set_var, set_type, set_value)
-                variables[set_var] = Variable(
-                    set_var, set_type, set_type(set_value))
-            case "add":
-                pass # TODO result[::-1] ?
+                        if is_string(set_value):
+                            set_type = str
+                            set_value = set_value[1:-1]
+                        elif set_value.isnumeric and '.' not in set_value:
+                            set_type = int
+                        elif re.fullmatch(Patterns.float_pattern, set_value):
+                            set_type = float
+                        else:
+                            set_type = type(set_value)
+                        print(set_var, set_type, set_value)
+                        variables[set_var] = Variable(
+                            set_var, set_type, set_type(set_value))
+                    case "add":
+                        pass # TODO result[::-1] ?
             case _:
                 raise Exception(
                     f"Unimplemented expression type: {self.expr_type}")
@@ -165,12 +169,11 @@ def devide_to_lines(r):
 def parse_line(line: str):
     result = devide_by_spec(line)
     # result = devide_to_lines(result)
-    print(result)
-    for d, i in enumerate(result):
-        if re.fullmatch(Patterns.set_pattern, i):
-            result[d] = Expression(i, "set")
-        else:
-            result[d] = Expression(i, "undefined")
+    # for d, i in enumerate(result):
+    #     if re.fullmatch(Patterns.set_pattern, i):
+    #         result[d] = Expression(i, "set")
+    #     else:
+    #         result[d] = Expression(i, "undefined")
 
     return result
 
@@ -183,10 +186,9 @@ def execute_expressions(expressions: list[Expression]) -> None:
 def main():
     f = "".join(open("./example.mylang", 'r').readlines())
     parsed = parse_line(f)
-    execute_expressions(parsed)
+    # execute_expressions(parsed)
     print(parsed)
     print(variables)
-    print(type(variables['c'].value))
 
 
 if __name__ == "__main__":
