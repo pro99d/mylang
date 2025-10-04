@@ -7,7 +7,8 @@ SPEC_CHR = [" ", "=", "\n", ";", "==", ">",
 
 class Patterns:
     set_pattern = r'^[^=]+=[^=]+$'
-    float_pattern = r'^[\d^.]+.[\d^.]+$'
+    float_pattern = r'^[\d^.]?.[\d^.]?$'
+    call_pattern = r'^[]+([]+)$'
 
 
 class Variable:
@@ -77,6 +78,7 @@ class Expression:
                 e = self.expr.split("=")
                 set_var = e[0]
                 set_value = e[1]
+
                 if is_string(set_value):
                     set_type = str
                     set_value = set_value[1:-1]
@@ -86,7 +88,7 @@ class Expression:
                     set_type = float
                 else:
                     set_type = type(set_value)
-
+                print(set_var, set_type, set_value)
                 variables[set_var] = Variable(
                     set_var, set_type, set_type(set_value))
             case "add":
@@ -162,8 +164,8 @@ def devide_to_lines(r):
 
 def parse_line(line: str):
     result = devide_by_spec(line)
-    result = devide_to_lines(result)
-
+    # result = devide_to_lines(result)
+    print(result)
     for d, i in enumerate(result):
         if re.fullmatch(Patterns.set_pattern, i):
             result[d] = Expression(i, "set")
