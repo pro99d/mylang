@@ -2,6 +2,7 @@ import unittest
 import main
 import re
 
+
 class TestStringMethods(unittest.TestCase):
 
     def test(self):
@@ -13,7 +14,9 @@ class TestStringMethods(unittest.TestCase):
         ]
         for test_case in strings:
             print(test_case)
-            self.assertEqual(bool(re.fullmatch(main.Patterns.float_pattern, test_case[0])), test_case[1])
+            self.assertEqual(
+                bool(re.fullmatch(main.Patterns.float_pattern, test_case[0])), test_case[1])
+
 
 if __name__ == '__main__':
     unittest.main()

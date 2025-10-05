@@ -1,4 +1,5 @@
 import re
+from exceptions import RED, CLEAR
 globals = {}
 SPEC_CHR = [" ", "=", "\n", ";", "==", ">",
             "<", "<=", ">=", "+", "-", "/", "*"]
@@ -30,7 +31,6 @@ class Variable:
         if type(other) is self:
             return self.value+other.value
         return self.value+other
-    
 
     def __div__(self, other):
         if type(other) is self:
@@ -52,6 +52,7 @@ class Variable:
             return self.value*other.value
         return self.value*other
 
+
 class Function:
     def __init__(self, values):
         self.values = values
@@ -65,11 +66,14 @@ variables = {}  # имя: Variable
  
 """
 
+
 class Keyword:
     pass
+
+
 class Expression:
     # TODO реализовать вложенные выражения
-    def __init__(self, value: str, expr_subtype: str, expr_type: str= "bin") -> None:
+    def __init__(self, value, expr_subtype: str, expr_type: str = "bin") -> None:
         self.expr = value
         self.expr_type = expr_type
         self.expr_subtype = expr_subtype
@@ -79,9 +83,9 @@ class Expression:
             case "bin":
                 match self.expr_subtype:
                     case "set":
-                        e = self.expr.split("=")
+                        e = list(map(str, self.expr))
                         set_var = e[0]
-                        set_value = e[1]
+                        set_value = e[2]
 
                         if is_string(set_value):
                             set_type = str
@@ -92,17 +96,16 @@ class Expression:
                             set_type = float
                         else:
                             set_type = type(set_value)
-                        print(set_var, set_type, set_value)
                         variables[set_var] = Variable(
                             set_var, set_type, set_type(set_value))
                     case "add":
-                        pass # TODO result[::-1] ?
+                        pass  # TODO result[::-1] ?
             case _:
                 raise Exception(
-                    f"Unimplemented expression type: {self.expr_type}")
+                    f"Нереализованный тип выражения: {self.expr_type}")
 
     def __repr__(self) -> str:
-        return self.expr  # [1:-1]
+        return str(self.expr)  # [1:-1]
 
 
 def is_string(s: str):
@@ -141,25 +144,17 @@ def devide_by_spec(line: str):
 
 
 def devide_to_lines(r):
-    """
-    TODO:
-    скопипастить разделение на токеты в функцию
-    использовать тут
-    """
     result = [""]
     r = iter(r)
+    prev = None
     while True:
         try:
-            try:
-                if i:
-                    pass
-            except NameError:
-                pass
             i = next(r)
             if i != ";":
                 result[-1] += str(i)
             else:
                 result.append("")
+            prev = i
         except StopIteration:
             break
     result = delete_empty(result)
@@ -168,6 +163,30 @@ def devide_to_lines(r):
 
 def parse_line(line: str):
     result = devide_by_spec(line)
+    result = iter(result)
+    f_res = []
+    prev = None
+    while True:
+        try:
+            i = next(result)
+            
+            match i:
+                case "=":
+                    if not prev:
+                        log = ""
+                        log+=i
+                        while i not in (';', '\n'):
+                            try:
+                                i = next(result)
+                                log+=i
+                            except StopIteration:
+                                break
+                        raise Exception(f"{RED}Синтаксическая ошибка: {CLEAR}{log}")
+                    f_res.append(Expression([prev, i, next(result)], "set"))
+
+            prev = i
+        except StopIteration:
+            break
     # result = devide_to_lines(result)
     # for d, i in enumerate(result):
     #     if re.fullmatch(Patterns.set_pattern, i):
@@ -175,7 +194,7 @@ def parse_line(line: str):
     #     else:
     #         result[d] = Expression(i, "undefined")
 
-    return result
+    return f_res
 
 
 def execute_expressions(expressions: list[Expression]) -> None:
@@ -186,7 +205,7 @@ def execute_expressions(expressions: list[Expression]) -> None:
 def main():
     f = "".join(open("./example.mylang", 'r').readlines())
     parsed = parse_line(f)
-    # execute_expressions(parsed)
+    execute_expressions(parsed)
     print(parsed)
     print(variables)
 
