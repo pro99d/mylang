@@ -2,7 +2,7 @@ import re
 from exceptions import RED, CLEAR
 globals = {}
 SPEC_CHR = [" ", "=", "\n", ";", "==", ">",
-            "<", "<=", ">=", "+", "-", "/", "*"]
+            "<", "<=", ">=", "+", "-", "/", "*", "(", ")", "{", "}", "[", "]"]
 # паттерны
 
 
@@ -13,10 +13,18 @@ class Patterns:
 
 
 class Variable:
-    def __init__(self, name, _type, value):
+    def __init__(self, name, _type, value, callable=False):
         self.name = name
         self.type = _type
         self.value = value
+        self.callable = False
+
+    def __call__(self, *args, **kargs):
+        if self.callable:
+            return self.value(*args, **kargs)
+        else:
+            raise TypeError(
+                f"{RED}'{self.type}' object is not callable{CLEAR}")
 
     def __repr__(self) -> str:
         return str(self.value)
@@ -62,6 +70,15 @@ class Function:
 
 
 variables = {}  # имя: Variable
+
+
+def init_variables():
+    v = {"print": print, "len": len}
+    for n, f in v.items():
+        variables[n] = Variable(n, "function", f, True)
+
+
+init_variables()
 """
  
 """
@@ -124,14 +141,27 @@ def delete_empty(wtp: list) -> list:
 def devide_by_spec(line: str):
     cur_string = ''
     result = []
-    for i in line:
-        if i in SPEC_CHR:
-            if cur_string:
-                result.append(cur_string)
-            cur_string = ""
-            result.append(i)
-            continue
-        cur_string += i
+    line = iter(line)
+    while True:
+        try:
+            i = next(line)
+            if i in SPEC_CHR:
+                if cur_string:
+                    result.append(cur_string)
+                cur_string = ""
+                result.append(i)
+                continue
+            elif i == "#":
+                while i != "\n":
+                    try:
+                        i = next(line)
+                    except StopIteration:
+                        break
+                continue
+            cur_string += i
+
+        except StopIteration:
+            break
     if cur_string:
         result.append(cur_string)
     result = delete_empty(result)
@@ -169,21 +199,23 @@ def parse_line(line: str):
     while True:
         try:
             i = next(result)
-            
-            match i:
-                case "=":
-                    if not prev:
-                        log = ""
-                        log+=i
-                        while i not in (';', '\n'):
-                            try:
-                                i = next(result)
-                                log+=i
-                            except StopIteration:
-                                break
-                        raise Exception(f"{RED}Синтаксическая ошибка: {CLEAR}{log}")
-                    f_res.append(Expression([prev, i, next(result)], "set"))
-
+            if i == "=":
+                if not prev:
+                    log = ""
+                    log += i
+                    while i not in (';', '\n'):
+                        try:
+                            i = next(result)
+                            log += i
+                        except StopIteration:
+                            break
+                    raise Exception(
+                        f"{RED}Синтаксическая ошибка: {CLEAR}{log}")
+                f_res.append(Expression([prev, i, next(result)], "set"))
+            elif i == "+":
+                pass
+            elif all(not i[0].isnumeric(), i in variables):
+                pass
             prev = i
         except StopIteration:
             break
@@ -204,10 +236,11 @@ def execute_expressions(expressions: list[Expression]) -> None:
 
 def main():
     f = "".join(open("./example.mylang", 'r').readlines())
-    parsed = parse_line(f)
-    execute_expressions(parsed)
-    print(parsed)
-    print(variables)
+    # parsed = parse_line(f)
+    # execute_expressions(parsed)
+    # print(parsed)
+    # print(variables)
+    print(devide_by_spec(f))
 
 
 if __name__ == "__main__":
