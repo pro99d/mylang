@@ -3,6 +3,7 @@ from exceptions import RED, CLEAR
 globals = {}
 SPEC_CHR = [" ", "=", "\n", ";", "==", ">",
             "<", "<=", ">=", "+", "-", "/", "*", "(", ")", "{", "}", "[", "]"]
+
 # паттерны
 
 
@@ -125,6 +126,31 @@ class Expression:
         return str(self.expr)  # [1:-1]
 
 
+class Brackets:
+    def __init__(self, content: list[Expression]):
+        self.content = content
+
+    def process(self):
+        for token in self.content:
+            print(type(token), token)
+            if isinstance(token, Brackets):
+                token.process()
+            else:
+                token.find_result()
+
+    def append(self, token):
+        self.content.append(token)
+
+    def __getitem__(self, key):
+        return self.content[key]
+
+    def __setitem__(self, key, value):
+        self.content[key] = value
+
+    def __repr__(self) -> str:
+        return str(self.content)
+
+
 def is_string(s: str):
     if s[0] != '"' and s[-1] != '"':
         return False
@@ -141,10 +167,10 @@ def delete_empty(wtp: list) -> list:
 def devide_by_spec(line: str):
     cur_string = ''
     result = []
-    line = iter(line)
+    iter_line = iter(line)
     while True:
         try:
-            i = next(line)
+            i = next(iter_line)
             if i in SPEC_CHR:
                 if cur_string:
                     result.append(cur_string)
@@ -154,7 +180,7 @@ def devide_by_spec(line: str):
             elif i == "#":
                 while i != "\n":
                     try:
-                        i = next(line)
+                        i = next(iter_line)
                     except StopIteration:
                         break
                 continue
@@ -194,8 +220,9 @@ def devide_to_lines(r):
 def parse_line(line: str):
     result = devide_by_spec(line)
     result = iter(result)
-    f_res = []
+    f_res = Brackets([[]])
     prev = None
+    opene_f = 0
     while True:
         try:
             i = next(result)
@@ -211,11 +238,17 @@ def parse_line(line: str):
                             break
                     raise Exception(
                         f"{RED}Синтаксическая ошибка: {CLEAR}{log}")
-                f_res.append(Expression([prev, i, next(result)], "set"))
+                f_res[-1].append(Expression([prev, i, next(result)], "set"))
             elif i == "+":
                 pass
-            elif all(not i[0].isnumeric(), i in variables):
+            elif not i[0].isnumeric() and i in variables:
                 pass
+            elif i == "{":
+                opene_f += 1
+            elif i == "}":
+                opene_f -= 1
+                f_res[-1] = Brackets(f_res[-1])
+                f_res.append([])
             prev = i
         except StopIteration:
             break
@@ -236,11 +269,12 @@ def execute_expressions(expressions: list[Expression]) -> None:
 
 def main():
     f = "".join(open("./example.mylang", 'r').readlines())
-    # parsed = parse_line(f)
+    parsed = parse_line(f)
     # execute_expressions(parsed)
     # print(parsed)
     # print(variables)
-    print(devide_by_spec(f))
+    print(parsed)
+    parsed.process()
 
 
 if __name__ == "__main__":

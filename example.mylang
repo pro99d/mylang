@@ -1,4 +1,6 @@
-var a = 1;
+{
+    var a = 1;
+}
 var b = "s";
 var c = 1.1; # комментарий
 print(a); 
