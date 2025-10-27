@@ -1,7 +1,18 @@
 from sly import Parser
 from lexer import MyLangLexer
-import os
-import sys
+
+
+my_lang_functions = {}
+
+
+def ml_function(function):
+    my_lang_functions[function.__name__[:-1]] = function
+    return function
+
+
+@ml_function
+def print_(*args, **kargs):
+    print(*args, **kargs)
 
 
 class MyLangParser(Parser):
@@ -29,9 +40,11 @@ class MyLangParser(Parser):
         self.names[p.ID] = p.expr
         return p.expr
 
-    # @_('expr')
-    # def statement(self, p):
-    #     return p.expr
+    # @_('ID LPAREN ARG')
+
+    @_('expr')
+    def statement(self, p):
+        return p.expr
 
     @_('expr PLUS term')
     def expr(self, p):
@@ -67,7 +80,27 @@ class MyLangParser(Parser):
 
     @_('LPAREN expr RPAREN')
     def factor(self, p):
+        print("PARENS")
         return p.expr
+
+    @_('ID LPAREN args RPAREN')
+    def term(self, p):
+        func = my_lang_functions.get(p.ID)
+        if not func:
+            raise NameError(f"Function {p.ID} is not defined!")
+        return func(*p.args)
+
+    @_('expr')
+    def args(self, p):
+        return p.expr
+
+    @_('args COMMA expr')
+    def args(self, p):
+        return p.args+[p.expr.__repr__()]
+
+    @_('expr COMMA expr')
+    def args(self, p):
+        return [p.expr0.__repr__(), p.expr1.__repr__()]
 
     @_('ID')
     def factor(self, p):
@@ -85,7 +118,7 @@ if __name__ == '__main__':
         tokens = lexer.tokenize(text)
         try:
             result = parser.parse(tokens)
-            print(parser.names)
+            # print(parser.names)
         except NameError as e:
             print(f"Error: {e}")
     else:
