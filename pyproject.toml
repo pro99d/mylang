@@ -6,5 +6,8 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "autopep8>=2.3.2",
-    "sly>=0.5",
+    "sly",
 ]
+
+[tool.uv.sources]
+sly = { git = "https://github.com/dabeaz/sly.git", rev = "master" }

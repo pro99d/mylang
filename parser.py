@@ -1,30 +1,22 @@
+"""
+todo: 
+ [ ] - задокументировать ошибки  и предупреждения в SLY 
+"""
+
 from exceptions import RED, CLEAR
 import sys
 import os
-stderr = sys.stderr
-sys.stderr = open(os.devnull, "w")
+from namespace import ml_globals
+from interpreter import MyLangInterpreter
 from sly import Parser
 from lexer import MyLangLexer
 DEBUG = True
-sys.stderr = stderr
-
-ml_globals = {}
 
 
+# декоратор для добавления функции языку
 def ml_function(function):
     ml_globals[function.__name__[:-1]] = function
     return function
-
-
-@ml_function
-def print_(*args, **kargs):
-    print(*args, **kargs)
-
-
-@ml_function
-def type_(*args, **kargs):
-    return type(*args, **kargs)
-
 
 class AstNode:
     def __init__(self, op, left, right=None):
@@ -34,45 +26,13 @@ class AstNode:
     def __repr__(self):
         return f"({self.op}, {self.l}, {self.r})"
 
-class Interpreter:
-    def __init__(self):
-        pass
-    def interpret(self, data: AstNode):
-        op = data.op 
-        left = data.l 
-        right = data.r
-        i = self.interpret
-        match op:
-            case "NUMBER":
-                return left
-            case "ASSIGN":
-                ml_globals[left] = i(right)
-                return i(right)
-            case "READ":
-                if left in ml_globals:
-                    return ml_globals[left]
-                else:
-                    raise NameError(f"{RED}Undefined name {CLEAR}{left}")
-            case "ADD":
-                return i(left)+i(right)
-            case "SUB":
-                return i(left)-i(right)
-            case "MUL":
-                return i(left)*i(right)
-            case "DIV":
-                return i(left)/i(right)
-            case "CALL":
-                right = list(map(i, right))
-                return left(*right)
-            case _:
-                print(f"{RED}Unknown operation {CLEAR}{op}")
-                return
 
 
 class MyLangParser(Parser):
     tokens = MyLangLexer.tokens
 
     def __init__(self):
+        super().__init__()
         self.names = ml_globals
 
         # super().log = MyLangLogger(sys.stderr)
@@ -91,7 +51,7 @@ class MyLangParser(Parser):
         return p.statements
 
     @_('ID ASSIGN expr')
-    def expr(self, p):
+    def statement(self, p):
         # self.names[p.ID] = p.expr
         return AstNode("ASSIGN", p.ID, p.expr)
     
@@ -155,17 +115,17 @@ class MyLangParser(Parser):
             args = p.args
         return AstNode("CALL", func, args)
 
-    @_('expr')
+    @_('expr args_tail')
     def args(self, p):
-        return p.expr
+        return [p.expr] + p.args_tail
 
-    @_('args COMMA expr')
-    def args(self, p):
-        return p.args+[p.expr]
+    @_('')
+    def args_tail(self, p):
+        return []
 
-    @_('expr COMMA expr')
-    def args(self, p):
-        return [p.expr0, p.expr1]
+    @_('COMMA expr args_tail')
+    def args_tail(self, p):
+        return [p.expr] + p.args_tail
 
     @_('ID')
     def factor(self, p):
@@ -175,7 +135,7 @@ class MyLangParser(Parser):
 if __name__ == '__main__':
     lexer = MyLangLexer()
     parser = MyLangParser()
-    interpreter = Interpreter()
+    interpreter = MyLangInterpreter()
     # while True:
     text = open("./simple.mylang").read()
     if text:
