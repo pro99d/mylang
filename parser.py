@@ -1,12 +1,18 @@
+from exceptions import RED, CLEAR
+import sys
+import os
+stderr = sys.stderr
+sys.stderr = open(os.devnull, "w")
 from sly import Parser
 from lexer import MyLangLexer
+DEBUG = True
+sys.stderr = stderr
 
-
-my_lang_functions = {}
+ml_globals = {}
 
 
 def ml_function(function):
-    my_lang_functions[function.__name__[:-1]] = function
+    ml_globals[function.__name__[:-1]] = function
     return function
 
 
@@ -15,12 +21,18 @@ def print_(*args, **kargs):
     print(*args, **kargs)
 
 
+@ml_function
+def type_(*args, **kargs):
+    return type(*args, **kargs)
+
+
 class MyLangParser(Parser):
     tokens = MyLangLexer.tokens
 
     def __init__(self):
-        self.names = {}
+        self.names = ml_globals
 
+        # super().log = MyLangLogger(sys.stderr)
     start = 'statements'
 
     @_('statement')
@@ -73,6 +85,9 @@ class MyLangParser(Parser):
     @_('NUMBER')
     def factor(self, p):
         return p.NUMBER
+    # @_('NUMBER DOT NUMBER')
+    # def factor(self, p):
+    #     return float(f"{p.NUMBER0}.{p.NUMBER1}")
 
     @_('STRING')
     def factor(self, p):
@@ -85,10 +100,14 @@ class MyLangParser(Parser):
 
     @_('ID LPAREN args RPAREN')
     def term(self, p):
-        func = my_lang_functions.get(p.ID)
+        func = self.names.get(p.ID)
         if not func:
-            raise NameError(f"Function {p.ID} is not defined!")
-        return func(*p.args)
+            raise NameError(f"{RED}Function {p.ID} is not defined!{CLEAR}")
+        if not isinstance(p.args, list):
+            args = [p.args]
+        else:
+            args = p.args
+        return func(*args)
 
     @_('expr')
     def args(self, p):
@@ -96,11 +115,11 @@ class MyLangParser(Parser):
 
     @_('args COMMA expr')
     def args(self, p):
-        return p.args+[p.expr.__repr__()]
+        return p.args+[p.expr]
 
     @_('expr COMMA expr')
     def args(self, p):
-        return [p.expr0.__repr__(), p.expr1.__repr__()]
+        return [p.expr0, p.expr1]
 
     @_('ID')
     def factor(self, p):

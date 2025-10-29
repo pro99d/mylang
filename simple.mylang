@@ -1,6 +1,7 @@
 a = 1+1;
 b = a+2;
-c = 100;
-print(b, a, c);
+# a = 1.0;
+c = type(a);
+print(k, b);
 # a = 2
 # b = 4

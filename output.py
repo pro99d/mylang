@@ -1,0 +1,1 @@
+11111222222224442222type(2)<class 'int'><class 'int'><class 'int'><class 'int'><class 'int'><class 'int'>444[<class 'int'>, 4]print([<class 'int'>, 4])None
