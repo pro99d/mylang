@@ -4,7 +4,7 @@ from sly import Lexer
 class MyLangLexer(Lexer):
     tokens = {ID, COMPARE, NUMBER, PLUS, MINUS, TIMES,
               DIVIDE, ASSIGN, LPAREN, RPAREN,
-              LBRACE, RBRACE, STRING, SEMI, COMMA}
+              STRING, SEMI, COMMA}
 
     ignore = ' \t'
     ignore_comments = r"\#.*"

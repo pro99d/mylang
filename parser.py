@@ -26,6 +26,49 @@ def type_(*args, **kargs):
     return type(*args, **kargs)
 
 
+class AstNode:
+    def __init__(self, op, left, right=None):
+        self.op = op 
+        self.l = left 
+        self.r = right
+    def __repr__(self):
+        return f"({self.op}, {self.l}, {self.r})"
+
+class Interpreter:
+    def __init__(self):
+        pass
+    def interpret(self, data: AstNode):
+        op = data.op 
+        left = data.l 
+        right = data.r
+        i = self.interpret
+        match op:
+            case "NUMBER":
+                return left
+            case "ASSIGN":
+                ml_globals[left] = i(right)
+                return i(right)
+            case "READ":
+                if left in ml_globals:
+                    return ml_globals[left]
+                else:
+                    raise NameError(f"{RED}Undefined name {CLEAR}{left}")
+            case "ADD":
+                return i(left)+i(right)
+            case "SUB":
+                return i(left)-i(right)
+            case "MUL":
+                return i(left)*i(right)
+            case "DIV":
+                return i(left)/i(right)
+            case "CALL":
+                right = list(map(i, right))
+                return left(*right)
+            case _:
+                print(f"{RED}Unknown operation {CLEAR}{op}")
+                return
+
+
 class MyLangParser(Parser):
     tokens = MyLangLexer.tokens
 
@@ -37,21 +80,21 @@ class MyLangParser(Parser):
 
     @_('statement')
     def statements(self, p):
-        return p.statement
+        return [p.statement]
 
     @_('statements SEMI statement')
     def statements(self, p):
-        return p.statement
+        return p.statements+[p.statement]
 
     @_('statements SEMI')
     def statements(self, p):
         return p.statements
 
     @_('ID ASSIGN expr')
-    def statement(self, p):
-        self.names[p.ID] = p.expr
-        return p.expr
-
+    def expr(self, p):
+        # self.names[p.ID] = p.expr
+        return AstNode("ASSIGN", p.ID, p.expr)
+    
     # @_('ID LPAREN ARG')
 
     @_('expr')
@@ -60,23 +103,26 @@ class MyLangParser(Parser):
 
     @_('expr PLUS term')
     def expr(self, p):
-        return p.expr + p.term
+        return AstNode("ADD", p.expr, p.term)
 
     @_('expr MINUS term')
     def expr(self, p):
-        return p.expr - p.term
+        return AstNode("SUB", p.expr, p.term)
 
     @_('term')
     def expr(self, p):
         return p.term
 
+    @_('term COMPARE factor')
+    def term(self, p):
+        return AstNode("COMPARE", p.term, p.factor)
     @_('term TIMES factor')
     def term(self, p):
-        return p.term * p.factor
+        return AstNode("TIMES", p.term, p.factor)
 
     @_('term DIVIDE factor')
     def term(self, p):
-        return p.term / p.factor
+        return AstNode("DIVIDE", p.term, p.factor)
 
     @_('factor')
     def term(self, p):
@@ -84,14 +130,14 @@ class MyLangParser(Parser):
 
     @_('NUMBER')
     def factor(self, p):
-        return p.NUMBER
+        return AstNode("NUMBER", p.NUMBER)
     # @_('NUMBER DOT NUMBER')
     # def factor(self, p):
     #     return float(f"{p.NUMBER0}.{p.NUMBER1}")
 
     @_('STRING')
     def factor(self, p):
-        return str(p.STRING)[1:-1]
+        return AstNode("STRING", str(p.STRING)[1:-1])
 
     @_('LPAREN expr RPAREN')
     def factor(self, p):
@@ -107,7 +153,7 @@ class MyLangParser(Parser):
             args = [p.args]
         else:
             args = p.args
-        return func(*args)
+        return AstNode("CALL", func, args)
 
     @_('expr')
     def args(self, p):
@@ -123,20 +169,23 @@ class MyLangParser(Parser):
 
     @_('ID')
     def factor(self, p):
-        if p.ID in self.names:
-            return self.names[p.ID]
-        else:
-            raise NameError(f"Name '{p.ID}' is not defined")
+        return AstNode("READ", p.ID)
 
 
 if __name__ == '__main__':
     lexer = MyLangLexer()
     parser = MyLangParser()
+    interpreter = Interpreter()
+    # while True:
     text = open("./simple.mylang").read()
     if text:
+        # for i in text.split("\n"):
         tokens = lexer.tokenize(text)
         try:
             result = parser.parse(tokens)
+            for statement in result:
+                interpreter.interpret(statement)
+            # print(result)
             # print(parser.names)
         except NameError as e:
             print(f"Error: {e}")
