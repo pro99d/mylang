@@ -45,6 +45,8 @@ class MyLangInterpreter:
                 return i(left)/i(right)
             case "CALL":
                 right = list(map(i, right))
+                # kargs = other[0]
+                # kargs = dict(zip(kargs.keys(), list(map(i, kargs.values()))))
                 return left(*right)
             case "cond":
                 d = self.conditions[other[0]]

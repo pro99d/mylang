@@ -5,11 +5,11 @@ import sys
 
 @ml_function
 def print_(*args, **kargs):
-    sys.stdout.write(str(*args, **kargs)+"\n")
+    print(*list(map(str, args)), **kargs)
 
 @ml_function
-def stdout_(*args, **kargs):
-    sys.stdout.write(str(*args, **kargs))
+def stdout_(*args):
+    sys.stdout.write(*list(map(str, args)))
 
 @ml_function
 def type_(*args, **kargs):

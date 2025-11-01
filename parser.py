@@ -84,7 +84,7 @@ class MyLangParser(Parser):
         return p.statements+[p.statement]
 
     @_('ID ASSIGN expr')
-    def statement(self, p):
+    def expr(self, p):
         # self.names[p.ID] = p.expr
         return AstNode("ASSIGN", p.ID, p.expr)
 
@@ -177,6 +177,17 @@ class MyLangParser(Parser):
     def args_tail(self, p):
         return [p.expr] + p.args_tail
 
+    # @_('ID ASSIGN expr kargs_tail')
+    # def kargs(self, p):
+    #     return dict({p.ID:p.expr},  **p.kargs_tail)
+    #
+    # @_('')
+    # def kargs_tail(self, p):
+    #     return {}
+    #
+    # @_('COMMA ID ASSIGN expr kargs_tail')
+    # def kargs_tail(self, p):
+    #     return dics({p.ID:p.expr}, **p.kargs_tail)
     @_('ID')
     def factor(self, p):
         return AstNode("READ", p.ID, other= [p.lineno])
@@ -195,14 +206,14 @@ if __name__ == '__main__':
     if text:
         # for i in text.split("\n"):
         tokens = lexer.tokenize(text)
-        try:
-            result = parser.parse(tokens)
-            print(result)
-            for statement in result:
-                interpreter.interpret(statement)
-            # print(result)
-            # print(parser.names)
-        except NameError as e:
-            print(f"Error: {e}")
+        # try:
+        result = parser.parse(tokens)
+        print(result)
+        for statement in result:
+            interpreter.interpret(statement)
+        # print(result)
+        # print(parser.names)
+        # except NameError as e:
+            # print(f"Error: {e}")
     else:
         pass
