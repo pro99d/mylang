@@ -8,12 +8,17 @@ class MyLangInterpreter:
                            "SMALLER": "<", "GREATER": ">"}
 
     def interpret(self, data):
+        global ml_globals
         op = data.op
         left = data.l
         right = data.r
         other = data.other
         i = self.interpret
         match op:
+            case "BREAK":
+                return "BREAK"
+            case "CONTINUE":
+                return "CONTINUE"
             case "NOP":
                 return None
             case "NUMBER":
@@ -22,8 +27,10 @@ class MyLangInterpreter:
                 return left
             case "ASSIGN":
                 ml_globals[left] = i(right)
+                # print(ml_globals)
                 return i(right)
             case "READ":
+                # print(ml_globals)
                 if left in ml_globals:
                     return ml_globals[left]
                 else:
@@ -45,11 +52,11 @@ class MyLangInterpreter:
                 right = i(right)
                 match d:
                     case ">":
-                        return left>right
+                        return left > right
                     case "<":
-                        return left<right
+                        return left < right
                     case ">=":
-                        return left>= right
+                        return left >= right
                     case "<=":
                         return left <= right
                     case "not":
@@ -72,6 +79,19 @@ class MyLangInterpreter:
             case "ELSE":
                 for statement in left.l:
                     i(statement)
+
+            case "WHILE":
+                while i(left):
+                    for statement in right:
+                        r = i(statement)
+                        if r == "BREAK":
+                            break
+                        elif r == "CONTINUE":
+                            continue
+                # else:
+                #     for statement in other:
+                #         i(statement)
+
             case _:
                 print(f"{RED}Unknown operation {CLEAR}{op}")
                 return

@@ -6,7 +6,8 @@ class MyLangLexer(Lexer):
     tokens = {ID, COMPARE, NUMBER, PLUS, MINUS, TIMES,
               DIVIDE, ASSIGN, LPAREN, RPAREN,
               STRING, SEMI, COMMA, IF, ELSE, FUNC,
-              GOE, SOE, GREATER, SMALLER, LBRACE, RBRACE}
+              GOE, SOE, GREATER, SMALLER, LBRACE, RBRACE,
+              WHILE, CONTINUE, BREAK}
     ignore = ' \t'
     ignore_comments = r"\#.*"
     # ignore_separator = r';'
@@ -15,6 +16,10 @@ class MyLangLexer(Lexer):
     ID['if'] = IF
     ID['else'] = ELSE
     ID['func'] = FUNC
+    ID['while'] = WHILE
+    ID['break'] = BREAK
+    ID['continue'] = CONTINUE
+
     LBRACE = r'{'
     RBRACE = r'}'
 

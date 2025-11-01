@@ -5,7 +5,7 @@ todo:
 
 from exceptions import RED, CLEAR
 from sys import argv
-import os
+# import os
 from namespace import ml_globals
 from interpreter import MyLangInterpreter
 from sly import Parser
@@ -18,15 +18,16 @@ def ml_function(function):
     ml_globals[function.__name__[:-1]] = function
     return function
 
+
 class AstNode:
-    def __init__(self, op, left, right=None, other= []):
-        self.op = op 
-        self.l = left 
+    def __init__(self, op, left, right=None, other=[]):
+        self.op = op
+        self.l = left
         self.r = right
         self.other = other
+
     def __repr__(self):
         return f"({self.op}, {self.l}, {self.r}, {self.other})"
-
 
 
 class MyLangParser(Parser):
@@ -55,9 +56,22 @@ class MyLangParser(Parser):
     def statement(self, p):
         return AstNode("IF", p.cond, p.statements, other=[AstNode("ELSE", p.else_)])
 
+    # @_("WHILE LPAREN cond RPAREN LBRACE statements RBRACE")
+    # def statement(self, p):
+    #     return AstNode("WHILE", p.cond, p.statements)
+
+    @_('BREAK')
+    def statement(self, p):
+        return AstNode("BREAK", None)
+
+    @_('CONTINUE')
+    def statement(self, p):
+        return AstNode("CONTINUE", None)
+
     @_('')
     def else_(self, p):
         return AstNode("ELSE", [AstNode("NOP", None)])
+
     @_('ELSE LBRACE statements RBRACE')
     def else_(self, p):
         return AstNode("ELSE", p.statements)
@@ -73,7 +87,7 @@ class MyLangParser(Parser):
     def statement(self, p):
         # self.names[p.ID] = p.expr
         return AstNode("ASSIGN", p.ID, p.expr)
-    
+
     # @_('ID LPAREN ARG')
 
     @_('expr SEMI')
@@ -87,16 +101,14 @@ class MyLangParser(Parser):
     @_('expr MINUS term')
     def expr(self, p):
         return AstNode("SUB", p.expr, p.term)
-    
+
     @_('term GOE factor')
     def cond(self, p):
-        return AstNode("cond", p.term, p.factor, other= ["GOE"])
-
+        return AstNode("cond", p.term, p.factor, other=["GOE"])
 
     @_('term SOE factor')
     def cond(self, p):
         return AstNode("cond", p.term, p.factor, other=["SOE"])
-
 
     @_('term SMALLER factor')
     def cond(self, p):
@@ -104,7 +116,7 @@ class MyLangParser(Parser):
 
     @_('term GREATER factor')
     def cond(self, p):
-        return AstNode("cond", p.term, p.factor, other= ["GREATER"])
+        return AstNode("cond", p.term, p.factor, other=["GREATER"])
 
     @_('term')
     def expr(self, p):
@@ -112,7 +124,8 @@ class MyLangParser(Parser):
 
     @_('term COMPARE factor')
     def cond(self, p):
-        return AstNode("cond", p.term, p.factor, other= ["COMPARE"])
+        return AstNode("cond", p.term, p.factor, other=["COMPARE"])
+
     @_('term TIMES factor')
     def term(self, p):
         return AstNode("TIMES", p.term, p.factor)
@@ -124,6 +137,7 @@ class MyLangParser(Parser):
     @_('factor')
     def term(self, p):
         return p.factor
+
     @_('NUMBER')
     def factor(self, p):
         return AstNode("NUMBER", p.NUMBER)

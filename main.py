@@ -23,13 +23,8 @@ def main():
             result = parser.parse(tokens)
             i = 0
             labels = {}
-            while True:
-                try:
-                    statement = result[i]
-                except IndexError:
-                    break
+            for statement in result:
                 interpreter.interpret(statement)
-                i+=1
         except NameError as e:
             print(f"Error: {e}")
     else:
