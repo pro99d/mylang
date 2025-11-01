@@ -1,8 +1,10 @@
 a = 1+1;
 b = a+2;
 # a = 1.0;
-if (b>a){
+if (b<a){
     print("a>b");
+} else{
+    print("else works!");
 }
 c = type(a);
 print(b);

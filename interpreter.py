@@ -4,7 +4,7 @@ from namespace import ml_globals
 
 class MyLangInterpreter:
     def __init__(self):
-        self.conditions = {"GOE": ">=", "SOE": "<+",
+        self.conditions = {"GOE": ">=", "SOE": "<=",
                            "SMALLER": "<", "GREATER": ">"}
 
     def interpret(self, data):
@@ -14,6 +14,8 @@ class MyLangInterpreter:
         other = data.other
         i = self.interpret
         match op:
+            case "NOP":
+                return None
             case "NUMBER":
                 return left
             case "STRING":
@@ -63,8 +65,13 @@ class MyLangInterpreter:
                 if i(left):
                     for statement in right:
                         i(statement)
+                else:
+                    for statement in other:
+                        i(statement)
                 return
-
+            case "ELSE":
+                for statement in left.l:
+                    i(statement)
             case _:
                 print(f"{RED}Unknown operation {CLEAR}{op}")
                 return

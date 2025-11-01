@@ -51,10 +51,16 @@ class MyLangParser(Parser):
     def statements(self, p):
         return p.statements + [p.statement]
 
-    @_('IF LPAREN cond RPAREN LBRACE statements RBRACE')
+    @_('IF LPAREN cond RPAREN LBRACE statements RBRACE else_')
     def statement(self, p):
-        return AstNode("IF", p.cond, p.statements)
+        return AstNode("IF", p.cond, p.statements, other=[AstNode("ELSE", p.else_)])
 
+    @_('')
+    def else_(self, p):
+        return AstNode("ELSE", [AstNode("NOP", None)])
+    @_('ELSE LBRACE statements RBRACE')
+    def else_(self, p):
+        return AstNode("ELSE", p.statements)
     # @_('IF LPAREN expr RPAREN LBRACE statements RBRACE')
     # def statement(self, p):
     #     return AstNode("IF", p.expr, p.statements)
@@ -118,7 +124,6 @@ class MyLangParser(Parser):
     @_('factor')
     def term(self, p):
         return p.factor
-
     @_('NUMBER')
     def factor(self, p):
         return AstNode("NUMBER", p.NUMBER)

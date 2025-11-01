@@ -5,21 +5,21 @@ from sys import argv
 class MyLangLexer(Lexer):
     tokens = {ID, COMPARE, NUMBER, PLUS, MINUS, TIMES,
               DIVIDE, ASSIGN, LPAREN, RPAREN,
-              STRING, SEMI, COMMA, IF, ELSE, FUNC, GOE, SOE, GREATER, SMALLER, LBRACE, RBRACE}
+              STRING, SEMI, COMMA, IF, ELSE, FUNC,
+              GOE, SOE, GREATER, SMALLER, LBRACE, RBRACE}
     ignore = ' \t'
     ignore_comments = r"\#.*"
     # ignore_separator = r';'
     ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
 
     ID['if'] = IF
-    ID['ELSE'] = ELSE
-    ID['FUNC'] = FUNC
-
+    ID['else'] = ELSE
+    ID['func'] = FUNC
     LBRACE = r'{'
     RBRACE = r'}'
 
     GOE = r'>='
-    SOE = r'<+'
+    SOE = r'<='
     GREATER = r'>'
     SMALLER = r'<'
     PLUS = r'\+'

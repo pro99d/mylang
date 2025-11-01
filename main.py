@@ -21,8 +21,15 @@ def main():
         tokens = lexer.tokenize(text)
         try:
             result = parser.parse(tokens)
-            for statement in result:
+            i = 0
+            labels = {}
+            while True:
+                try:
+                    statement = result[i]
+                except IndexError:
+                    break
                 interpreter.interpret(statement)
+                i+=1
         except NameError as e:
             print(f"Error: {e}")
     else:
