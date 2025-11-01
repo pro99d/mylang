@@ -34,7 +34,7 @@ class MyLangInterpreter:
                 if left in ml_globals:
                     return ml_globals[left]
                 else:
-                    raise NameError(f"{RED}Undefined name {CLEAR}{left}")
+                    raise NameError(f"{RED}Undefined name {CLEAR}{left}{RED} at {CLEAR}{other[0]}")
             case "ADD":
                 return i(left)+i(right)
             case "SUB":

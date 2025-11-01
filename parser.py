@@ -56,9 +56,9 @@ class MyLangParser(Parser):
     def statement(self, p):
         return AstNode("IF", p.cond, p.statements, other=[AstNode("ELSE", p.else_)])
 
-    # @_("WHILE LPAREN cond RPAREN LBRACE statements RBRACE")
-    # def statement(self, p):
-    #     return AstNode("WHILE", p.cond, p.statements)
+    @_("WHILE LPAREN cond RPAREN LBRACE statements RBRACE")
+    def statement(self, p):
+        return AstNode("WHILE", p.cond, p.statements)
 
     @_('BREAK')
     def statement(self, p):
@@ -179,7 +179,7 @@ class MyLangParser(Parser):
 
     @_('ID')
     def factor(self, p):
-        return AstNode("READ", p.ID)
+        return AstNode("READ", p.ID, other= [p.lineno])
 
 
 if __name__ == '__main__':

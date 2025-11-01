@@ -7,6 +7,9 @@ import sys
 def print_(*args, **kargs):
     sys.stdout.write(str(*args, **kargs)+"\n")
 
+@ml_function
+def stdout_(*args, **kargs):
+    sys.stdout.write(str(*args, **kargs))
 
 @ml_function
 def type_(*args, **kargs):
@@ -21,8 +24,6 @@ def main():
         tokens = lexer.tokenize(text)
         try:
             result = parser.parse(tokens)
-            i = 0
-            labels = {}
             for statement in result:
                 interpreter.interpret(statement)
         except NameError as e:
