@@ -1,11 +1,11 @@
 from lexer import MyLangLexer
 from parser import MyLangInterpreter, MyLangParser, ml_function
-
+import sys
 
 
 @ml_function
 def print_(*args, **kargs):
-    print(*args, **kargs)
+    sys.stdout.write(str(*args, **kargs)+"\n")
 
 
 @ml_function

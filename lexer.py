@@ -1,15 +1,27 @@
 from sly import Lexer
+from sys import argv
 
 
 class MyLangLexer(Lexer):
     tokens = {ID, COMPARE, NUMBER, PLUS, MINUS, TIMES,
               DIVIDE, ASSIGN, LPAREN, RPAREN,
-              STRING, SEMI, COMMA}
-
+              STRING, SEMI, COMMA, IF, ELSE, FUNC, GOE, SOE, GREATER, SMALLER, LBRACE, RBRACE}
     ignore = ' \t'
     ignore_comments = r"\#.*"
     # ignore_separator = r';'
     ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
+
+    ID['if'] = IF
+    ID['ELSE'] = ELSE
+    ID['FUNC'] = FUNC
+
+    LBRACE = r'{'
+    RBRACE = r'}'
+
+    GOE = r'>='
+    SOE = r'<+'
+    GREATER = r'>'
+    SMALLER = r'<'
     PLUS = r'\+'
     MINUS = r'-'
     TIMES = r'\*'
@@ -38,7 +50,11 @@ class MyLangLexer(Lexer):
 
 
 if __name__ == '__main__':
-    data = open("./simple.mylang").read()
+    if len(argv) > 1:
+        name = argv[1]
+    else:
+        name = "function.mylang"
+    data = open(name).read()
     lexer = MyLangLexer()
     for tok in lexer.tokenize(data):
         print('type=%r, value=%r' % (tok.type, tok.value))
