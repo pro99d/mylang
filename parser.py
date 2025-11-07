@@ -5,18 +5,36 @@ todo:
 
 from exceptions import RED, CLEAR
 from sys import argv
-# import os
+import os
 from namespace import ml_globals
 from interpreter import MyLangInterpreter
 from sly import Parser
+from sly.yacc import SlyLogger
 from lexer import MyLangLexer
 DEBUG = True
 
-
+devnull = open(os.devnull, "w")
 # декоратор для добавления функции языку
 def ml_function(function):
     ml_globals[function.__name__[:-1]] = function
     return function
+
+class Logger(object):
+    def __init__(self, f):
+        self.f = devnull
+
+    def debug(self, msg, *args, **kwargs):
+        self.f.write((msg % args) + '\n')
+
+    info = debug
+
+    def warning(self, msg, *args, **kwargs):
+        self.f.write('WARNING: ' + (msg % args) + '\n')
+
+    def error(self, msg, *args, **kwargs):
+        self.f.write('ERROR: ' + (msg % args) + '\n')
+
+    critical = debug
 
 
 class AstNode:
@@ -34,7 +52,7 @@ class MyLangParser(Parser):
     tokens = MyLangLexer.tokens
 
     def __init__(self):
-        super().__init__()
+        super().__init__(log= Logger(devnull))
         self.names = ml_globals
 
         # super().log = MyLangLogger(sys.stderr)

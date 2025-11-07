@@ -26,7 +26,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "autopep8", specifier = ">=2.3.2" },
-    { name = "sly", git = "https://github.com/dabeaz/sly.git?rev=master" },
+    { name = "sly", git = "https://github.com/pro99d/sly.git?rev=master" },
 ]
 
 [[package]]
@@ -41,4 +41,4 @@ wheels = [
 [[package]]
 name = "sly"
 version = "0.5"
-source = { git = "https://github.com/dabeaz/sly.git?rev=master#539a85a5d5818bf4e1cb5a9e749d6e2fab70a351" }
+source = { git = "https://github.com/pro99d/sly.git?rev=master#ea108fb6947a04ec0bb9ac10b024e9ddc72e3642" }

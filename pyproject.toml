@@ -10,4 +10,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-sly = { git = "https://github.com/dabeaz/sly.git", rev = "master" }
+sly = { git = "https://github.com/pro99d/sly.git", rev = "master" }
