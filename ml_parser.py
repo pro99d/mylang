@@ -6,11 +6,11 @@ todo:
 from exceptions import RED, CLEAR
 from sys import argv
 import os
-from namespace import ml_globals
-from interpreter import MyLangInterpreter
+from ml_namespace import ml_globals
+from ml_interpreter import MyLangInterpreter
 from sly import Parser
 from sly.yacc import SlyLogger
-from lexer import MyLangLexer
+from ml_lexer import MyLangLexer
 DEBUG = True
 
 devnull = open(os.devnull, "w")

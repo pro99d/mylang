@@ -1,5 +1,5 @@
-from lexer import MyLangLexer
-from parser import MyLangInterpreter, MyLangParser, ml_function
+from ml_lexer import MyLangLexer
+from ml_parser import MyLangInterpreter, MyLangParser, ml_function
 import sys
 
 

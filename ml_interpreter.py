@@ -1,5 +1,5 @@
 from exceptions import RED, CLEAR
-from namespace import ml_globals
+from ml_namespace import ml_globals
 
 
 class MyLangInterpreter:
