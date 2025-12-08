@@ -7,7 +7,7 @@ from exceptions import RED, CLEAR
 from sys import argv
 import os
 from ml_namespace import ml_globals
-from ml_interpreter import MyLangInterpreter
+from ml_interpreter_cython import MyLangInterpreter
 from sly import Parser
 from sly.yacc import SlyLogger
 from ml_lexer import MyLangLexer

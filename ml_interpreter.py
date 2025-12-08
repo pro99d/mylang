@@ -36,7 +36,7 @@ class MyLangInterpreter:
                 else:
                     raise NameError(f"{RED}Undefined name {CLEAR}{left}{RED} at {CLEAR}{other[0]}")
             case "ADD":
-                return i(left)+i(right)
+                return i(left)+ i(right)
             case "SUB":
                 return i(left)-i(right)
             case "MUL":
