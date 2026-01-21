@@ -1,5 +1,5 @@
 from exceptions import RED, CLEAR
-from ml_namespace import ml_globals
+import ml_namespace as ns
 
 
 class MyLangInterpreter:
@@ -26,15 +26,12 @@ class MyLangInterpreter:
             case "STRING":
                 return left
             case "ASSIGN":
-                ml_globals[left] = i(right)
+                ns.ml_globals[left] = i(right)
                 # print(ml_globals)
                 return i(right)
             case "READ":
                 # print(ml_globals)
-                if left in ml_globals:
-                    return ml_globals[left]
-                else:
-                    raise NameError(f"{RED}Undefined name {CLEAR}{left}{RED} at {CLEAR}{other[0]}")
+                return ns.get_value(left)
             case "ADD":
                 return i(left)+ i(right)
             case "SUB":
@@ -45,9 +42,13 @@ class MyLangInterpreter:
                 return i(left)/i(right)
             case "CALL":
                 right = list(map(i, right))
-                # kargs = other[0]
-                # kargs = dict(zip(kargs.keys(), list(map(i, kargs.values()))))
-                return left(*right)
+                left = ns.get_value(left)
+                if left["type"] == "py":
+                    # kargs = other[0]
+                    # kargs = dict(zip(kargs.keys(), list(map(i, kargs.values()))))
+                    return left["call"](*right)
+                else:
+                    raise NotImplementedError("MyLang functions is not implemented yet")
             case "cond":
                 d = self.conditions[other[0]]
                 left = i(left)

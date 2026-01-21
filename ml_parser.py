@@ -16,7 +16,11 @@ DEBUG = True
 devnull = open(os.devnull, "w")
 # декоратор для добавления функции языку
 def ml_function(function):
-    ml_globals[function.__name__[:-1]] = function
+    data = {
+            "type": "py",
+            "call": function
+            }
+    ml_globals[function.__name__[:-1]] = data
     return function
 
 class Logger(object):
@@ -74,6 +78,9 @@ class MyLangParser(Parser):
     def statement(self, p):
         return AstNode("IF", p.cond, p.statements, other=[AstNode("ELSE", p.else_)])
 
+    @_('FUNC LPAREN args RPAREN LBRACE statements RBRACE')
+    def statement(self, p):
+        return AstNode("FUNC", p.args, p.statements)
     @_("WHILE LPAREN cond RPAREN LBRACE statements RBRACE")
     def statement(self, p):
         return AstNode("WHILE", p.cond, p.statements)
@@ -174,14 +181,11 @@ class MyLangParser(Parser):
 
     @_('ID LPAREN args RPAREN')
     def term(self, p):
-        func = self.names.get(p.ID)
-        if not func:
-            raise NameError(f"{RED}Function {p.ID} is not defined!{CLEAR}")
         if not isinstance(p.args, list):
             args = [p.args]
         else:
             args = p.args
-        return AstNode("CALL", func, args)
+        return AstNode("CALL", p.ID, args)
 
     @_('expr args_tail')
     def args(self, p):
