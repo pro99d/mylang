@@ -1,6 +1,4 @@
-{
-    var a = 1;
+func a(){
+    return 1;
 }
-var b = "s";
-var c = 1; # комментарий
-print(a); 
+print(a());

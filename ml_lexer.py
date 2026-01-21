@@ -7,19 +7,22 @@ class MyLangLexer(Lexer):
               DIVIDE, ASSIGN, LPAREN, RPAREN,
               STRING, SEMI, COMMA, IF, ELSE, #FUNC,
               GOE, SOE, GREATER, SMALLER, LBRACE, RBRACE,
-              WHILE, CONTINUE, BREAK}
+              WHILE, CONTINUE, BREAK, FUNC, RETURN, DOT,
+              COLON}
     ignore = ' \t'
     ignore_comments = r"\#.*"
     # ignore_separator = r';'
     ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
-
+    
     ID['if'] = IF
     ID['else'] = ELSE
     # ID['func'] = FUNC
     ID['while'] = WHILE
     ID['break'] = BREAK
     ID['continue'] = CONTINUE
-
+    ID["return"] = RETURN
+    FUNC = r'func'
+    DOT = r'\.'
     LBRACE = r'{'
     RBRACE = r'}'
 
@@ -36,6 +39,7 @@ class MyLangLexer(Lexer):
     LPAREN = r'\('
     RPAREN = r'\)'
     SEMI = r';'
+    COLON = r':'
     COMMA = r','
     # DOT = r'.'
 

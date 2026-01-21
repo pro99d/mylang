@@ -20,10 +20,16 @@ def type_(*args, **kargs):
     return type(*args, **kargs)
 
 def main():
+    for flag in sys.argv[1:]:
+        if not flag.startswith("--"):
+            text = open(flag).read()
+            break
+    else:
+        text = open("./simple.mylang").read()
+
     lexer = MyLangLexer()
     parser = MyLangParser()
     interpreter = MyLangInterpreter()
-    text = open("./simple.mylang").read()
     if text:
         tokens = lexer.tokenize(text)
         # try:
@@ -32,8 +38,6 @@ def main():
             interpreter.interpret(statement)
         # except NameError as e:
             # print(f"Error: {e}")
-    else:
-        pass
 
 
 if __name__ == "__main__":

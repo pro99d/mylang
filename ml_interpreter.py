@@ -26,7 +26,7 @@ class MyLangInterpreter:
             case "STRING":
                 return left
             case "ASSIGN":
-                ns.ml_globals[left] = i(right)
+                ns.write_value(left, i(right))
                 # print(ml_globals)
                 return i(right)
             case "READ":
@@ -40,15 +40,29 @@ class MyLangInterpreter:
                 return i(left)*i(right)
             case "DIV":
                 return i(left)/i(right)
+            case "FUNC":
+                ns.write_value(left, right)
+            case "RETURN":
+                return i(left)
             case "CALL":
                 right = list(map(i, right))
+                name = left
                 left = ns.get_value(left)
                 if left["type"] == "py":
                     # kargs = other[0]
                     # kargs = dict(zip(kargs.keys(), list(map(i, kargs.values()))))
                     return left["call"](*right)
-                else:
-                    raise NotImplementedError("MyLang functions is not implemented yet")
+                elif left['type'] == "my":
+                    ns.add_namespace()
+                    if len(right) != len(left["args"]):
+                        raise TypeError(f"{name}{RED} takes {len(left['args'])} positional arguments, but {len(right)} given")
+                    for d, i in enumerate(left["args"]):
+                        ns.write_value(d, right[i])
+                    for statement in left['call']:
+                        if statement.op == "return":
+                            return i(statement)
+                        i(statement)
+
             case "cond":
                 d = self.conditions[other[0]]
                 left = i(left)

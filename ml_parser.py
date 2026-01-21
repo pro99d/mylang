@@ -7,7 +7,7 @@ from exceptions import RED, CLEAR
 from sys import argv
 import os
 from ml_namespace import ml_globals
-from ml_interpreter_cython import MyLangInterpreter
+from ml_interpreter import MyLangInterpreter
 from sly import Parser
 from sly.yacc import SlyLogger
 from ml_lexer import MyLangLexer
@@ -78,9 +78,14 @@ class MyLangParser(Parser):
     def statement(self, p):
         return AstNode("IF", p.cond, p.statements, other=[AstNode("ELSE", p.else_)])
 
-    @_('FUNC LPAREN args RPAREN LBRACE statements RBRACE')
+    @_('FUNC ID LPAREN args RPAREN LBRACE statements RBRACE')
     def statement(self, p):
-        return AstNode("FUNC", p.args, p.statements)
+        data = {
+                "type": "ml",
+                "call": p.statements,
+                "args": p.args
+                }
+        return AstNode("FUNC", p.ID, data)
     @_("WHILE LPAREN cond RPAREN LBRACE statements RBRACE")
     def statement(self, p):
         return AstNode("WHILE", p.cond, p.statements)
@@ -88,6 +93,10 @@ class MyLangParser(Parser):
     @_('BREAK')
     def statement(self, p):
         return AstNode("BREAK", None)
+    
+    @_("RETURN expr")
+    def statement(self, p):
+        return AstNode("RETURN", p.expr)
 
     @_('CONTINUE')
     def statement(self, p):
