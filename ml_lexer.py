@@ -8,7 +8,7 @@ class MyLangLexer(Lexer):
               STRING, SEMI, COMMA, IF, ELSE, #FUNC,
               GOE, SOE, GREATER, SMALLER, LBRACE, RBRACE,
               WHILE, CONTINUE, BREAK, FUNC, RETURN, DOT,
-              COLON}
+              LSQBRACK, RSQBRACK}
     ignore = ' \t'
     ignore_comments = r"\#.*"
     # ignore_separator = r';'
@@ -26,6 +26,9 @@ class MyLangLexer(Lexer):
     LBRACE = r'{'
     RBRACE = r'}'
 
+    LSQBRACK = r'\['
+    RSQBRACK = r'\]'
+
     GOE = r'>='
     SOE = r'<='
     GREATER = r'>'
@@ -39,7 +42,7 @@ class MyLangLexer(Lexer):
     LPAREN = r'\('
     RPAREN = r'\)'
     SEMI = r';'
-    COLON = r':'
+    # COLON = r':'
     COMMA = r','
     # DOT = r'.'
 

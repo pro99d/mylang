@@ -23,6 +23,8 @@ class MyLangInterpreter:
                 return None
             case "NUMBER":
                 return left
+            case "LIST":
+                return list(map(i, left))
             case "STRING":
                 return left
             case "ASSIGN":

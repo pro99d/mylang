@@ -124,7 +124,13 @@ class MyLangParser(Parser):
         # self.names[p.ID] = p.expr
         return AstNode("ASSIGN", p.ID, p.expr)
 
-    # @_('ID LPAREN ARG')
+    @_('factor DOT ID LPAREN args RPAREN')
+    def factor(self, p):
+        if not isinstance(p.args, list):
+            args = [p.args]
+        else:
+            args = p.args
+        return AstNode("METHOD", p.factor, p.ID, args)
 
     @_('expr SEMI')
     def statement(self, p):
@@ -153,6 +159,10 @@ class MyLangParser(Parser):
     @_('term GREATER factor')
     def cond(self, p):
         return AstNode("cond", p.term, p.factor, other=["GREATER"])
+
+    @_('LSQBRACK args RSQBRACK')
+    def factor(self, p):
+        return AstNode("LIST", p.args)
     
     @_("cond")
     def expr(self, p):
@@ -181,12 +191,14 @@ class MyLangParser(Parser):
     @_('NUMBER')
     def factor(self, p):
         return AstNode("NUMBER", p.NUMBER)
+
     @_("MINUS NUMBER")
     def factor(self, p):
         return AstNode("NUMBER", -p.NUMBER)
-    # @_('NUMBER DOT NUMBER')
-    # def factor(self, p):
-    #     return float(f"{p.NUMBER0}.{p.NUMBER1}")
+    
+    @_('NUMBER DOT NUMBER')
+    def factor(self, p):
+        return AstNode("NUMBER", float(f"{p.NUMBER0}.{p.NUMBER1}"))
 
     @_('STRING')
     def factor(self, p):
@@ -194,7 +206,6 @@ class MyLangParser(Parser):
 
     @_('LPAREN expr RPAREN')
     def factor(self, p):
-        print("PARENS")
         return p.expr
 
     @_('ID LPAREN args RPAREN')
