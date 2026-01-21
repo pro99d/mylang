@@ -181,6 +181,9 @@ class MyLangParser(Parser):
     @_('NUMBER')
     def factor(self, p):
         return AstNode("NUMBER", p.NUMBER)
+    @_("MINUS NUMBER")
+    def factor(self, p):
+        return AstNode("NUMBER", -p.NUMBER)
     # @_('NUMBER DOT NUMBER')
     # def factor(self, p):
     #     return float(f"{p.NUMBER0}.{p.NUMBER1}")
