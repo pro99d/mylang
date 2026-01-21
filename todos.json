@@ -1,0 +1,27 @@
+{
+  "themeIndex": 1,
+  "sortMode": 0,
+  "tasks": [
+    {
+      "id": 1769019239793883387,
+      "title": "custom namespaces",
+      "done": false,
+      "dueAt": "0001-01-01T00:00:00Z",
+      "notified": false
+    },
+    {
+      "id": 1769019245537601692,
+      "title": "pointers",
+      "done": false,
+      "dueAt": "0001-01-01T00:00:00Z",
+      "notified": false
+    },
+    {
+      "id": 1769019281088327632,
+      "title": "compilable interpreter (on c?)",
+      "done": false,
+      "dueAt": "0001-01-01T00:00:00Z",
+      "notified": false
+    }
+  ]
+}
