@@ -1,4 +1,14 @@
-func a(){
-    return 1;
+func fib(n){
+    a = 0;
+    b = 1;
+    c = b;
+    i = 0;
+    while (i < n){
+        c = a+b;
+        a = b;
+        b = c;
+        i = i + 1;
+    }
+    return a;
 }
-print(a());
+print(fib(100));

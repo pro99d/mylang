@@ -69,7 +69,9 @@ class MyLangParser(Parser):
     @_('')
     def statements(self, p):
         return []
-
+    @_('')
+    def args(self, p):
+        return []
     @_('statements statement')
     def statements(self, p):
         return p.statements + [p.statement]
@@ -94,7 +96,7 @@ class MyLangParser(Parser):
     def statement(self, p):
         return AstNode("BREAK", None)
     
-    @_("RETURN expr")
+    @_("RETURN expr SEMI")
     def statement(self, p):
         return AstNode("RETURN", p.expr)
 
@@ -151,6 +153,10 @@ class MyLangParser(Parser):
     @_('term GREATER factor')
     def cond(self, p):
         return AstNode("cond", p.term, p.factor, other=["GREATER"])
+    
+    @_("cond")
+    def expr(self, p):
+        return p.cond
 
     @_('term')
     def expr(self, p):
@@ -189,7 +195,7 @@ class MyLangParser(Parser):
         return p.expr
 
     @_('ID LPAREN args RPAREN')
-    def term(self, p):
+    def factor(self, p):
         if not isinstance(p.args, list):
             args = [p.args]
         else:

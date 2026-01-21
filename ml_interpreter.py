@@ -52,14 +52,14 @@ class MyLangInterpreter:
                     # kargs = other[0]
                     # kargs = dict(zip(kargs.keys(), list(map(i, kargs.values()))))
                     return left["call"](*right)
-                elif left['type'] == "my":
+                elif left['type'] == "ml":
                     ns.add_namespace()
                     if len(right) != len(left["args"]):
                         raise TypeError(f"{name}{RED} takes {len(left['args'])} positional arguments, but {len(right)} given")
-                    for d, i in enumerate(left["args"]):
-                        ns.write_value(d, right[i])
+                    for d, id in enumerate(left["args"]):
+                        ns.write_value(id.l, right[d])
                     for statement in left['call']:
-                        if statement.op == "return":
+                        if statement.op == "RETURN":
                             return i(statement)
                         i(statement)
 

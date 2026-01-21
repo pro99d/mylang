@@ -63,9 +63,15 @@ class Parser:
             else:
                 result.append(name)
         return result
-
+    
     def parse(self, tokens: list):
-        pass
+        index = 0
+        while True:
+            if index < len(tokens):
+                cur_token = tokens[index]
+            else:
+                break
+            
 
     def can_process(self, data: tuple[str]) -> bool:
         started = []

@@ -21,7 +21,7 @@ class MyLangLexer(Lexer):
     ID['break'] = BREAK
     ID['continue'] = CONTINUE
     ID["return"] = RETURN
-    FUNC = r'func'
+    ID["func"] = FUNC
     DOT = r'\.'
     LBRACE = r'{'
     RBRACE = r'}'
