@@ -1,10 +1,5 @@
-c = 6;
-func a(){
-    c += 1;
-    if (c > 5){
-        return true;
-    }else{
-        return false;
-    }
+func c(a, b){
+    a = a * b;
+    return a;
 }
-print($("2**3182"));
+print(c(2, 3));

@@ -2,7 +2,7 @@ from exceptions import RED, CLEAR
 ml_globals = {
     "true":True,
     "false":False,
-    "void":None
+    "void":None,
 }
 active_namespaces = [ml_globals]
 def get_value(name: str):

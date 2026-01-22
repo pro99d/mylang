@@ -1,2 +1,2 @@
-import ml_interpreter_cython as ml_interpreter
-
+def c(a, b):
+    return a**b

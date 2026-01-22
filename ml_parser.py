@@ -120,9 +120,9 @@ class MyLangParser(Parser):
     def statement(self, p):
         return AstNode("INCLUDE", p.ID)
 
-    @_("DOLL LPAREN STRING RPAREN") 
+    @_("DOLL LPAREN expr RPAREN") 
     def factor(self, p):
-        return AstNode("EXEC", p.STRING)
+        return AstNode("EXEC", p.expr)
 
     @_('ELSE LBRACE statements RBRACE')
     def else_(self, p):
@@ -130,7 +130,6 @@ class MyLangParser(Parser):
     # @_('IF LPAREN expr RPAREN LBRACE statements RBRACE')
     # def statement(self, p):
     #     return AstNode("IF", p.expr, p.statements)
-
     @_('statements SEMI statement')
     def statements(self, p):
         return p.statements+[p.statement]

@@ -30,7 +30,6 @@ class MyLangLexer(Lexer):
     LBRACE = r'{'
     RBRACE = r'}'
     DOLL = r'\$'
-
     LSQBRACK = r'\['
     RSQBRACK = r'\]'
 

@@ -12,6 +12,17 @@ def print_(*args, **kargs):
     print(*list(map(str, args)), **kargs)
 
 @ml_function
+def str_(s):
+    return str(s)
+
+@ml_function
+def int_(s):
+    return str(s)
+
+@ml_function
+def float_(s):
+    return str(s)
+@ml_function
 def stdout_(*args):
     sys.stdout.write(*list(map(str, args)))
 
