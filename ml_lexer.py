@@ -29,6 +29,7 @@ class MyLangLexer(Lexer):
     LSQBRACK = r'\['
     RSQBRACK = r'\]'
 
+    # Longer operators first to ensure proper matching
     GOE = r'>='
     SOE = r'<='
     GREATER = r'>'

@@ -40,7 +40,6 @@ class Logger(object):
 
     critical = debug
 
-
 class AstNode:
     def __init__(self, op, left, right=None, other=[]):
         self.op = op
@@ -54,6 +53,15 @@ class AstNode:
 
 class MyLangParser(Parser):
     tokens = MyLangLexer.tokens
+
+    precedence = (
+        ('right', ELSE),
+        ('right', ASSIGN),
+        ('left', PLUS, MINUS),
+        ('left', TIMES, DIVIDE),
+        ('left', COMPARE, GOE, SOE, GREATER, SMALLER),
+        ('left', LPAREN, RPAREN, LSQBRACK, RSQBRACK),
+    )
 
     def __init__(self):
         super().__init__(log= Logger(devnull))

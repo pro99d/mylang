@@ -7,7 +7,7 @@ ml_globals = {
 active_namespaces = [ml_globals]
 def get_value(name: str):
     for namespace in active_namespaces[::-1]:
-        if name in namespace.keys():
+        if name in namespace:
             return namespace[name]
     else:
         raise NameError(f"{RED}Undefined name {CLEAR}{name}")
