@@ -8,7 +8,7 @@ class MyLangLexer(Lexer):
               STRING, SEMI, COMMA, IF, ELSE, #FUNC,
               GOE, SOE, GREATER, SMALLER, LBRACE, RBRACE,
               WHILE, CONTINUE, BREAK, FUNC, RETURN, DOT,
-              LSQBRACK, RSQBRACK}
+              LSQBRACK, RSQBRACK, INC, DOLL, NOT, AND, OR}
     ignore = ' \t'
     ignore_comments = r"\#.*"
     # ignore_separator = r';'
@@ -22,9 +22,14 @@ class MyLangLexer(Lexer):
     ID['continue'] = CONTINUE
     ID["return"] = RETURN
     ID["func"] = FUNC
+    ID["include"] = INC
+    ID["not"] = NOT
+    ID["and"] = AND
+    ID["or"] = OR 
     DOT = r'\.'
     LBRACE = r'{'
     RBRACE = r'}'
+    DOLL = r'\$'
 
     LSQBRACK = r'\['
     RSQBRACK = r'\]'

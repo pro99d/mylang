@@ -35,6 +35,7 @@ def main():
         # try:
         result = parser.parse(tokens)
         for statement in result:
+            # print(statement)
             interpreter.interpret(statement)
         # except NameError as e:
             # print(f"Error: {e}")

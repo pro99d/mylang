@@ -116,6 +116,14 @@ class MyLangParser(Parser):
     def else_(self, p):
         return AstNode("ELSE", [AstNode("NOP", None)])
 
+    @_('INC ID')
+    def statement(self, p):
+        return AstNode("INCLUDE", p.ID)
+
+    @_("DOLL LPAREN STRING RPAREN") 
+    def factor(self, p):
+        return AstNode("EXEC", p.STRING)
+
     @_('ELSE LBRACE statements RBRACE')
     def else_(self, p):
         return AstNode("ELSE", p.statements)
@@ -144,6 +152,22 @@ class MyLangParser(Parser):
     def statement(self, p):
         return p.expr
 
+    @_('ID PLUS ASSIGN expr')
+    def factor(self, p):
+        return AstNode("ASSIGN", p.ID, AstNode("ADD", AstNode("READ", p.ID), p.expr))
+
+    @_('ID MINUS ASSIGN expr')
+    def factor(self, p):
+        return AstNode("ASSIGN", p.ID, AstNode("SUB", AstNode("READ", p.ID), p.expr))
+
+    @_('ID TIMES ASSIGN expr')
+    def factor(self, p):
+        return AstNode("ASSIGN", p.ID, AstNode("MUL", AstNode("READ", p.ID), p.expr))
+
+    @_('ID DIVIDE ASSIGN expr')
+    def factor(self, p):
+        return AstNode("ASSIGN", p.ID, AstNode("DIV", AstNode("READ", p.ID), p.expr))
+
     @_('expr PLUS term')
     def expr(self, p):
         return AstNode("ADD", p.expr, p.term)
@@ -167,6 +191,18 @@ class MyLangParser(Parser):
     @_('term GREATER factor')
     def cond(self, p):
         return AstNode("cond", p.term, p.factor, other=["GREATER"])
+    
+    @_('term OR factor')
+    def cond(self, p):
+        return AstNode("cond", p.term, p.factor, other=["or"])
+
+    @_('term AND factor')
+    def cond(self, p):
+        return AstNode("cond", p.term, p.factor, other=["and"])
+
+    @_('NOT term')
+    def cond(self, p):
+        return AstNode("cond", p.term, None, other=["not"])
 
     @_('LSQBRACK args RSQBRACK')
     def factor(self, p):

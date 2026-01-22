@@ -1,3 +1,10 @@
-a = [3, 2, 1, "this is a string"];
-a.pop(0);
-print(a);
+c = 6;
+func a(){
+    c += 1;
+    if (c > 5){
+        return true;
+    }else{
+        return false;
+    }
+}
+print($("2**3182"));

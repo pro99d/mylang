@@ -5,10 +5,10 @@ import ml_namespace as ns
 class MyLangInterpreter:
     def __init__(self):
         self.conditions = {"GOE": ">=", "SOE": "<=",
-                           "SMALLER": "<", "GREATER": ">"}
+                           "SMALLER": "<", "GREATER": ">",
+                           "not":"not", "and":"and", "or":"or"}
 
     def interpret(self, data):
-        global ml_globals
         op = data.op
         left = data.l
         right = data.r
@@ -68,7 +68,8 @@ class MyLangInterpreter:
             case "cond":
                 d = self.conditions[other[0]]
                 left = i(left)
-                right = i(right)
+                if right:
+                    right = i(right)
                 match d:
                     case ">":
                         return left > right
@@ -88,25 +89,32 @@ class MyLangInterpreter:
                         print(f"{RED} Unknown operator: {CLEAR}{d}")
                         exit()
             case "IF":
+                print(right)
                 if i(left):
                     for statement in right:
-                        i(statement)
+                        p =  i(statement)
+                        if statement.op == "RETURN":
+                            return p
                 else:
                     for statement in other:
-                        i(statement)
+                        p = i(statement)
+                        if statement.op == "RETURN":
+                            return p
                 return
-            case "ELSE":
-                for statement in left.l:
-                    i(statement)
+            # case "ELSE":
+            #     for statement in left.l:
+            #         i(statement)
+            case "EXEC":
+                return eval(left)
 
             case "WHILE":
                 while i(left):
                     for statement in right:
                         r = i(statement)
                         if r == "BREAK":
-                            break
+                            return 
                         elif r == "CONTINUE":
-                            continue
+                            break
                 # else:
                 #     for statement in other:
                 #         i(statement)
