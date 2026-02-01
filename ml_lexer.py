@@ -8,7 +8,7 @@ class MyLangLexer(Lexer):
               STRING, SEMI, COMMA, IF, ELSE, #FUNC,
               GOE, SOE, GREATER, SMALLER, LBRACE, RBRACE,
               WHILE, CONTINUE, BREAK, FUNC, RETURN, DOT,
-              LSQBRACK, RSQBRACK, INC, DOLL, NOT, AND, OR}
+              LSQBRACK, RSQBRACK, INC, DOLL, NOT, AND, OR, OP}
     ignore = ' \t'
     ignore_comments = r"\#.*"
     # ignore_separator = r';'
@@ -34,6 +34,7 @@ class MyLangLexer(Lexer):
     RSQBRACK = r'\]'
 
     # Longer operators first to ensure proper matching
+    OP =  r'(>=|<=|>|<|\+|-|\*|/|==)'
     GOE = r'>='
     SOE = r'<='
     GREATER = r'>'
