@@ -1,6 +1,7 @@
 from ml_lexer import MyLangLexer
 from dataclasses import dataclass
 from typing import Any
+from exceptions import RED, CLEAR
 
 
 class TokenType:
@@ -50,21 +51,36 @@ class AstNode:
         self.other = other
 
 class Parser:
-    def __init__(self, tokens):
+    def __init__(self, tokens, file):
         self.tokens = tokens
         self.pos = 0
+        self.file = file
+    def write_error(self, message, errcode= 1):
+        token = self.tokens[self.pos]
+        with open(self.file) as f:
+            errl = f"{token.lineno}| {f.readline()}"
+        left = errl[:token.index]
+        center = errl[token.index:token.end+1]
+        end = errl[token.end+1:]
+        print(f"{left}{RED}{center}{CLEAR}{end[:-1]}")
+        print(f"{' '*(1+token.index)}{RED}{'^'*(len(center)-1)}{CLEAR}")
+        print(f"{message} at line {self.tokens[self.pos-1].lineno}") 
+        if errcode != None:
+            exit(errcode)
 
     def consume(self, expected_type):
+        # if expected_type == "NUMBER":
+            # print(expected_type, self.tokens[self])
         if self.pos < len(self.tokens) and self.tokens[self.pos].type == expected_type:
             self.pos += 1
             return self.tokens[self.pos - 1]
         else:
             raise SyntaxError(
-                f"Expected {expected_type}, got {self.tokens[self.pos-1]}")
+                f"Expected {expected_type}, got {self.tokens[self.pos].type}")
 
-    def lookahead(self):
-        if self.pos + 1 < len(self.tokens):
-            return self.tokens[self.pos + 1]
+    def lookahead(self, dp: int= 1):
+        if self.pos + dp < len(self.tokens):
+            return self.tokens[self.pos + dp]
 
     def call_statement(self):
         name = self.consume('ID')
@@ -96,16 +112,20 @@ class Parser:
         return arguments
     def expression(self):
         left = self.term()
-        while self.pos < len(self.tokens) and self.tokens[self.pos] == 'OP':
+        self.write_error("", None)
+        while self.pos < len(self.tokens) and self.lookahead().type == 'OP':
             op = self.consume('OP')
             right = self.term()
             left = BinOp(left, op, right)
         return left
 
     def term(self):
-        token = self.tokens[self.pos]
+        token = self.tokens[self.pos-1]
+        self.write_error("", None)
+        print(token.type)
         if token.type == 'NUMBER':
-            return AstNode("NUMBER", self.consume('NUMBER'))
+            num = self.consume('NUMBER')
+            return AstNode("NUMBER", num)
         elif token.type == 'ID':
             return Variable(self.consume('ID'))
         elif token.type == 'LPAREN':
@@ -115,11 +135,13 @@ class Parser:
             return expr
         else:
             raise SyntaxError("Invalid syntax")
+            # self.write_error("Invalid syntax")
 
     def assignment(self):
-        self.consume('ID')  # consume 'let'
+        self.consume('ID')
         var_name = self.consume('ID')
         self.consume('ASSIGN')
+        self.pos += 1
         expr = self.expression()
         self.consume('SEMI')
         return Assign(var_name, expr)
@@ -130,6 +152,8 @@ class Parser:
             return self.assignment()
         elif token.type == 'ID' and self.lookahead().type == "LPAREN":
             return self.call_statement()
+        elif self.lookahead(2).type == "OP":
+            return self.expression()
         else:
             raise SyntaxError("Unknown statement")
 
@@ -148,7 +172,7 @@ def main():
     with open("test.par") as f:
         file = f.read()
     lexed = list(lexer.tokenize(file))
-    parser = Parser(lexed)
+    parser = Parser(lexed, "test.par")
     print(parser.parse())
 
 

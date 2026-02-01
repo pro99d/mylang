@@ -3,10 +3,8 @@ from sys import argv
 
 
 class MyLangLexer(Lexer):
-    tokens = {ID, COMPARE, NUMBER, PLUS, MINUS, TIMES,
-              DIVIDE, ASSIGN, LPAREN, RPAREN,
-              STRING, SEMI, COMMA, IF, ELSE, #FUNC,
-              GOE, SOE, GREATER, SMALLER, LBRACE, RBRACE,
+    tokens = {ID, NUMBER, ASSIGN, LPAREN, RPAREN, ASSIGN,
+              STRING, SEMI, COMMA, IF, ELSE, LBRACE, RBRACE,
               WHILE, CONTINUE, BREAK, FUNC, RETURN, DOT,
               LSQBRACK, RSQBRACK, INC, DOLL, NOT, AND, OR, OP}
     ignore = ' \t'
@@ -35,15 +33,6 @@ class MyLangLexer(Lexer):
 
     # Longer operators first to ensure proper matching
     OP =  r'(>=|<=|>|<|\+|-|\*|/|==)'
-    GOE = r'>='
-    SOE = r'<='
-    GREATER = r'>'
-    SMALLER = r'<'
-    PLUS = r'\+'
-    MINUS = r'-'
-    TIMES = r'\*'
-    DIVIDE = r'/'
-    COMPARE = r'=='
     ASSIGN = r'='
     LPAREN = r'\('
     RPAREN = r'\)'
