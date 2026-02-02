@@ -14,14 +14,6 @@ from ml_lexer import MyLangLexer
 DEBUG = True
 
 devnull = open(os.devnull, "w")
-# декоратор для добавления функции языку
-def ml_function(function):
-    data = {
-            "type": "py",
-            "call": function
-            }
-    ml_globals[function.__name__[:-1]] = data
-    return function
 
 class Logger(object):
     def __init__(self, f):

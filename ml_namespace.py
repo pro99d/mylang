@@ -1,4 +1,14 @@
 from exceptions import RED, CLEAR
+
+# декоратор для добавления функции языку
+def ml_function(function):
+    data = {
+            "type": "py",
+            "call": function
+            }
+    ml_globals[function.__name__[:-1]] = data
+    return function
+
 ml_globals = {
     "true":True,
     "false":False,

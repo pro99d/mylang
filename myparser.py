@@ -2,10 +2,7 @@ from ml_lexer import MyLangLexer
 from dataclasses import dataclass
 from typing import Any
 from exceptions import RED, CLEAR
-
-
-class TokenType:
-    number = "NUMBER"
+from ml_interpreter import MyLangInterpreter
 
 
 class ASTNode:
@@ -49,6 +46,8 @@ class AstNode:
         self.l = left
         self.r = right
         self.other = other
+    def __repr__(self):
+        return f"AstNode(op={self.op}, left={self.l}, right={self.r}, other={self.other})"
 
 class Parser:
     def __init__(self, tokens, file):
@@ -69,8 +68,6 @@ class Parser:
             exit(errcode)
 
     def consume(self, expected_type):
-        # if expected_type == "NUMBER":
-            # print(expected_type, self.tokens[self])
         if self.pos < len(self.tokens) and self.tokens[self.pos].type == expected_type:
             self.pos += 1
             return self.tokens[self.pos - 1]
@@ -88,52 +85,63 @@ class Parser:
         args = self.arguments()
         self.consume('RPAREN')
         self.consume('SEMI')
-        return AstNode("CALL", name, args)
+        return AstNode("CALL", name.value, args)
         return Call(name, args)
 
     def arguments(self):
         token = self.tokens[self.pos]
         arguments = []
-        if token.type in ('STRING', 'NUMBER', 'ID'):
-            arguments.append(token.value)
-            self.pos += 1
-        else:
-            raise SyntaxError(f"Invalid syntax at line {token.lineno}")
-
+        arguments.append(self.expression())
+        self.write_error("", None)
         while self.pos < len(self.tokens):
             token = self.tokens[self.pos]
-            if token.type in ('STRING', 'NUMBER', 'ID'):
-                arguments.append(token.value)
-            if self.lookahead() != "SEMI":
+            arguments.append(self.expression())
+            if self.lookahead().type != "COMMA":
                 break
             else:
-                self.consume("SEMI")
+                self.pos += 1
+                self.consume("COMMA")
             self.pos += 1
         return arguments
     def expression(self):
         left = self.term()
-        self.write_error("", None)
-        while self.pos < len(self.tokens) and self.lookahead().type == 'OP':
+        while self.pos < len(self.tokens) and self.tokens[self.pos].type == 'OP':
             op = self.consume('OP')
+            other = []
+            match op.value:
+                case "+":
+                    op = "ADD"
+                case "-":
+                    op = "SUB"
+                case "/":
+                    op = "DIV"
+                case "*":
+                    op = "MUL"
+                case _:
+                    if op in [">=", "<=", "==", "<", ">"]:
+                        other.append(op)
+                        op = 'cond'
             right = self.term()
-            left = BinOp(left, op, right)
+            left = AstNode(op, left, right, other)
         return left
 
     def term(self):
-        token = self.tokens[self.pos-1]
-        self.write_error("", None)
-        print(token.type)
+        token = self.tokens[self.pos]
         if token.type == 'NUMBER':
-            num = self.consume('NUMBER')
+            num = token.value
             return AstNode("NUMBER", num)
+        elif token.type == 'STRING':
+            return AstNode("NUMBER", token.value)
         elif token.type == 'ID':
-            return Variable(self.consume('ID'))
+            id = token.value
+            return AstNode("READ", id)
         elif token.type == 'LPAREN':
             self.consume('LPAREN')
             expr = self.expression()
             self.consume('RPAREN')
             return expr
         else:
+            print(token)
             raise SyntaxError("Invalid syntax")
             # self.write_error("Invalid syntax")
 
@@ -141,10 +149,9 @@ class Parser:
         self.consume('ID')
         var_name = self.consume('ID')
         self.consume('ASSIGN')
-        self.pos += 1
         expr = self.expression()
         self.consume('SEMI')
-        return Assign(var_name, expr)
+        return AstNode("ASSIGN", var_name.value, expr)
 
     def statement(self):
         token = self.tokens[self.pos]
@@ -169,11 +176,15 @@ class Parser:
 
 def main():
     lexer = MyLangLexer()
+    interpreter = MyLangInterpreter()
     with open("test.par") as f:
         file = f.read()
     lexed = list(lexer.tokenize(file))
     parser = Parser(lexed, "test.par")
-    print(parser.parse())
+    parsed = parser.parse()
+    print(parsed)
+    for statement in parsed:
+        interpreter.interpret(statement)
 
 
 if __name__ == "__main__":

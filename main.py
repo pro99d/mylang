@@ -1,5 +1,6 @@
 from ml_lexer import MyLangLexer
-from ml_parser import MyLangParser, ml_function
+from ml_namespace import ml_function
+from myparser import Parser
 import sys
 USE_CYTHON = "--cython" in sys.argv
 if USE_CYTHON:
@@ -31,20 +32,20 @@ def type_(*args, **kargs):
     return type(*args, **kargs)
 
 def main():
+    file = "./simple.mylang"
     for flag in sys.argv[1:]:
         if not flag.startswith("--"):
-            text = open(flag).read()
+            file = flag
             break
-    else:
-        text = open("./simple.mylang").read()
+    text = open(file).read()
 
     lexer = MyLangLexer()
-    parser = MyLangParser()
     interpreter = MyLangInterpreter()
     if text:
-        tokens = lexer.tokenize(text)
+        tokens = list(lexer.tokenize(text))
         # try:
-        result = parser.parse(tokens)
+        parser = Parser(tokens, file)
+        result = parser.parse()
         for statement in result:
             # print(statement)
             interpreter.interpret(statement)
