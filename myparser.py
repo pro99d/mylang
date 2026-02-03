@@ -86,25 +86,25 @@ class Parser:
         self.consume('RPAREN')
         self.consume('SEMI')
         return AstNode("CALL", name.value, args)
-        return Call(name, args)
 
     def arguments(self):
         token = self.tokens[self.pos]
         arguments = []
-        arguments.append(self.expression())
-        self.write_error("", None)
+        expr = self.expression()
+        arguments.append(expr)
+        # self.write_error("", None)
         while self.pos < len(self.tokens):
             token = self.tokens[self.pos]
             arguments.append(self.expression())
             if self.lookahead().type != "COMMA":
                 break
             else:
-                self.pos += 1
                 self.consume("COMMA")
-            self.pos += 1
+            # self.pos += 1
         return arguments
     def expression(self):
         left = self.term()
+        self.pos += 1
         while self.pos < len(self.tokens) and self.tokens[self.pos].type == 'OP':
             op = self.consume('OP')
             other = []
@@ -131,7 +131,7 @@ class Parser:
             num = token.value
             return AstNode("NUMBER", num)
         elif token.type == 'STRING':
-            return AstNode("NUMBER", token.value)
+            return AstNode("STRING", token.value)
         elif token.type == 'ID':
             id = token.value
             return AstNode("READ", id)
