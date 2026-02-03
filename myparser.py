@@ -3,11 +3,17 @@ from dataclasses import dataclass
 from typing import Any
 from exceptions import RED, CLEAR
 from ml_interpreter import MyLangInterpreter
+import traceback
 
+DEBUG = True # TODO change to False
+
+@dataclass
+class Token:
+    type: str
+    value: Any
 
 class ASTNode:
     pass
-
 
 @dataclass
 class Number(ASTNode):
@@ -52,49 +58,63 @@ class AstNode:
 class Parser:
     def __init__(self, tokens, file):
         self.tokens = tokens
-        self.pos = 0
+        self.pos = 1
         self.file = file
+    def print_call_stack(self):
+        if not DEBUG:
+            return
+        l = list(traceback.format_stack(limit= 6))
+        for call in l[:4]:
+            print(call)
+
     def write_error(self, message, errcode= 1):
-        token = self.tokens[self.pos]
+        token = self.tokens[self.pos - 1]
         with open(self.file) as f:
-            errl = f"{token.lineno}| {f.readline()}"
+            errl = f.readline()
+        linen = f"{token.lineno}| "
         left = errl[:token.index]
         center = errl[token.index:token.end+1]
         end = errl[token.end+1:]
-        print(f"{left}{RED}{center}{CLEAR}{end[:-1]}")
-        print(f"{' '*(1+token.index)}{RED}{'^'*(len(center)-1)}{CLEAR}")
-        print(f"{message} at line {self.tokens[self.pos-1].lineno}") 
+        shift = len(linen)
+        shift_line = ' ' * (len(left) + shift)
+        self.print_call_stack()
+        print(f"{linen}{left}{RED}{center}{CLEAR}{end}", end="")
+        print(f"{shift_line}{RED}{'^'*(len(center))}{CLEAR}")
+        print(f"{message} at line {token.lineno}") 
         if errcode != None:
             exit(errcode)
 
     def consume(self, expected_type):
+        # print(expected_type, self.tokens[self.pos])
         if self.pos < len(self.tokens) and self.tokens[self.pos].type == expected_type:
             self.pos += 1
             return self.tokens[self.pos - 1]
         else:
-            raise SyntaxError(
-                f"Expected {expected_type}, got {self.tokens[self.pos].type}")
+            self.write_error(f"Expected {expected_type}, got {self.tokens[self.pos].type}")
 
-    def lookahead(self, dp: int= 1):
+    def lookahead(self, dp: int= 0):
         if self.pos + dp < len(self.tokens):
             return self.tokens[self.pos + dp]
+        else:
+            return Token("EOF", None)
 
     def call_statement(self):
-        name = self.consume('ID')
+        name = self.tokens[self.pos-1]
         self.consume('LPAREN')
+        # self.pos += 1
         args = self.arguments()
         self.consume('RPAREN')
         self.consume('SEMI')
         return AstNode("CALL", name.value, args)
 
     def arguments(self):
-        token = self.tokens[self.pos]
+        token = self.tokens[self.pos-1]
         arguments = []
         expr = self.expression()
         arguments.append(expr)
         # self.write_error("", None)
         while self.pos < len(self.tokens):
-            token = self.tokens[self.pos]
+            token = self.tokens[self.pos-1]
             arguments.append(self.expression())
             if self.lookahead().type != "COMMA":
                 break
@@ -126,7 +146,7 @@ class Parser:
         return left
 
     def term(self):
-        token = self.tokens[self.pos]
+        token = self.tokens[self.pos-1]
         if token.type == 'NUMBER':
             num = token.value
             return AstNode("NUMBER", num)
@@ -142,8 +162,8 @@ class Parser:
             return expr
         else:
             print(token)
-            raise SyntaxError("Invalid syntax")
-            # self.write_error("Invalid syntax")
+            # raise SyntaxError("Invalid syntax")
+            self.write_error("Invalid syntax")
 
     def assignment(self):
         self.consume('ID')
@@ -154,20 +174,23 @@ class Parser:
         return AstNode("ASSIGN", var_name.value, expr)
 
     def statement(self):
-        token = self.tokens[self.pos]
+        token = self.tokens[self.pos-1]
+        lookahead = self.lookahead()
+        # print(self.lookahead())
         if token.type == 'ID' and token.value == 'var':
             return self.assignment()
-        elif token.type == 'ID' and self.lookahead().type == "LPAREN":
+        elif token.type == 'ID' and lookahead.type == "LPAREN":
             return self.call_statement()
-        elif self.lookahead(2).type == "OP":
-            return self.expression()
+        # elif lookahead.type == "OP":
+        #     return self.expression()
         else:
+            self.write_error("Unknown statement", None)
             raise SyntaxError("Unknown statement")
 
     def parse(self):
         statements = []
         while self.pos < len(self.tokens):
-            if self.tokens[self.pos].type == 'NEWLINE':
+            if self.tokens[self.pos-1].type == 'NEWLINE':
                 self.pos += 1  # Skip newlines
                 continue
             statements.append(self.statement())
