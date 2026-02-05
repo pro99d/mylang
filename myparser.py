@@ -85,7 +85,6 @@ class Parser:
             exit(errcode)
 
     def consume(self, expected_type):
-        # print(expected_type, self.tokens[self.pos])
         if self.pos < len(self.tokens) and self.tokens[self.pos].type == expected_type:
             self.pos += 1
             return self.tokens[self.pos - 1]
@@ -102,7 +101,11 @@ class Parser:
         name = self.tokens[self.pos-1]
         self.consume('LPAREN')
         self.pos += 1
-        args = self.arguments()
+        if self.lookahead(-1).type != "RPAREN":
+            args = self.arguments()
+        else:
+            args = []
+        self.pos -= 1
         self.consume('RPAREN')
         self.consume('SEMI')
         return AstNode("CALL", name.value, args)
@@ -120,7 +123,6 @@ class Parser:
             else:
                 self.consume("COMMA")
             arguments.append(self.expression())
-        self.pos -= 1
         # print(arguments)
         return arguments
     def expression(self):
@@ -179,6 +181,38 @@ class Parser:
         self.pos += 1
         return AstNode("ASSIGN", var_name.value, expr)
 
+    def func_args(self):
+        token = self.lookahead()
+        if token.type == "RPAREN":
+            return []
+        arguments = []
+        self.pos += 1
+        expr = self.expression()
+        arguments.append(expr)
+        while self.pos < len(self.tokens):
+            # token = self.tokens[self.pos-1]
+            if self.lookahead().type != "COMMA":
+                break
+            else:
+                self.consume("COMMA")
+            arguments.append(self.consume("ID"))
+    def function(self):
+        self.consume("FUNC")
+        name = self.consume("ID")
+        # print(self.tokens[self.pos].type)
+        self.consume("LPAREN") 
+        arguments = self.func_args()
+        self.consume("RPAREN")
+        self.consume("LBRACE")
+        instructions = []
+        self.pos += 1
+        while self.lookahead().type != "RBRACE":
+            instructions.append(self.statement())
+        r = self.consume("RBRACE")
+        self.pos += 1
+        return AstNode("FUNC", name.value, {"type":"ml", "call":instructions, "args":arguments})
+
+
     def statement(self):
         token = self.tokens[self.pos-1]
         lookahead = self.lookahead()
@@ -188,8 +222,9 @@ class Parser:
             return self.assignment()
         elif token.type == 'ID' and lookahead.type == "LPAREN":
             return self.call_statement()
-        # elif token.type == 'FUNC':
-            # return self.function()
+        elif token.type == 'FUNC':
+            self.pos -= 1
+            return self.function()
         # elif lookahead.type == "OP":
         #     return self.expression()
         else:
