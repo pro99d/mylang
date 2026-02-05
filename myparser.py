@@ -70,7 +70,7 @@ class Parser:
     def write_error(self, message, errcode= 1):
         token = self.tokens[self.pos - 1]
         with open(self.file) as f:
-            errl = f.readline()
+            errl = f.read().split("\n")[token.lineno-1]
         linen = f"{token.lineno}| "
         left = errl[:token.index]
         center = errl[token.index:token.end+1]
@@ -78,7 +78,7 @@ class Parser:
         shift = len(linen)
         shift_line = ' ' * (len(left) + shift)
         self.print_call_stack()
-        print(f"{linen}{left}{RED}{center}{CLEAR}{end}", end="")
+        print(f"{linen}{left}{RED}{center}{CLEAR}{end}")
         print(f"{shift_line}{RED}{'^'*(len(center))}{CLEAR}")
         print(f"{message} at line {token.lineno}") 
         if errcode != None:
@@ -101,7 +101,7 @@ class Parser:
     def call_statement(self):
         name = self.tokens[self.pos-1]
         self.consume('LPAREN')
-        # self.pos += 1
+        self.pos += 1
         args = self.arguments()
         self.consume('RPAREN')
         self.consume('SEMI')
@@ -114,17 +114,18 @@ class Parser:
         arguments.append(expr)
         # self.write_error("", None)
         while self.pos < len(self.tokens):
-            token = self.tokens[self.pos-1]
-            arguments.append(self.expression())
+            # token = self.tokens[self.pos-1]
             if self.lookahead().type != "COMMA":
                 break
             else:
                 self.consume("COMMA")
-            # self.pos += 1
+            arguments.append(self.expression())
+        self.pos -= 1
+        # print(arguments)
         return arguments
     def expression(self):
         left = self.term()
-        self.pos += 1
+        # self.pos += 1
         while self.pos < len(self.tokens) and self.tokens[self.pos].type == 'OP':
             op = self.consume('OP')
             other = []
@@ -141,8 +142,10 @@ class Parser:
                     if op in [">=", "<=", "==", "<", ">"]:
                         other.append(op)
                         op = 'cond'
+            self.pos += 1
             right = self.term()
             left = AstNode(op, left, right, other)
+        self.pos += 1
         return left
 
     def term(self):
@@ -169,8 +172,11 @@ class Parser:
         self.consume('ID')
         var_name = self.consume('ID')
         self.consume('ASSIGN')
+        self.pos += 1
         expr = self.expression()
+        self.pos -= 1
         self.consume('SEMI')
+        self.pos += 1
         return AstNode("ASSIGN", var_name.value, expr)
 
     def statement(self):
@@ -178,14 +184,17 @@ class Parser:
         lookahead = self.lookahead()
         # print(self.lookahead())
         if token.type == 'ID' and token.value == 'var':
+            self.pos -= 1
             return self.assignment()
         elif token.type == 'ID' and lookahead.type == "LPAREN":
             return self.call_statement()
+        # elif token.type == 'FUNC':
+            # return self.function()
         # elif lookahead.type == "OP":
         #     return self.expression()
         else:
-            self.write_error("Unknown statement", None)
-            raise SyntaxError("Unknown statement")
+            print(token)
+            self.write_error("Unknown statement")
 
     def parse(self):
         statements = []

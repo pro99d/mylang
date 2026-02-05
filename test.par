@@ -1,1 +1,4 @@
-print(2+2*2);
+func a(){
+    return 2;
+}
+print(a());
