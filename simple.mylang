@@ -1,6 +1,6 @@
 
-func a(){
-   print(2);
+func a(n){
+   return n;
 }
-a();
-#print(a());
+# a();
+print(a(1));

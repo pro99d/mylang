@@ -1,3 +1,4 @@
+from ast import arg
 from ml_lexer import MyLangLexer
 from dataclasses import dataclass
 from typing import Any
@@ -107,7 +108,6 @@ class Parser:
             args = []
         self.pos -= 1
         self.consume('RPAREN')
-        self.consume('SEMI')
         return AstNode("CALL", name.value, args)
 
     def arguments(self):
@@ -128,6 +128,10 @@ class Parser:
     def expression(self):
         left = self.term()
         # self.pos += 1
+        if self.pos < len(self.tokens) and self.tokens[self.pos].type == 'LPAREN':
+            call =  self.call_statement()
+            self.pos += 1
+            return call
         while self.pos < len(self.tokens) and self.tokens[self.pos].type == 'OP':
             op = self.consume('OP')
             other = []
@@ -186,8 +190,7 @@ class Parser:
         if token.type == "RPAREN":
             return []
         arguments = []
-        self.pos += 1
-        expr = self.expression()
+        expr = AstNode("READ", self.consume("ID").value)
         arguments.append(expr)
         while self.pos < len(self.tokens):
             # token = self.tokens[self.pos-1]
@@ -195,7 +198,10 @@ class Parser:
                 break
             else:
                 self.consume("COMMA")
-            arguments.append(self.consume("ID"))
+            arguments.append(AstNode("READ", self.consume("ID").value))
+        # self.pos -=1
+        return arguments
+
     def function(self):
         self.consume("FUNC")
         name = self.consume("ID")
@@ -211,7 +217,16 @@ class Parser:
         r = self.consume("RBRACE")
         self.pos += 1
         return AstNode("FUNC", name.value, {"type":"ml", "call":instructions, "args":arguments})
-
+    
+    def return_sttmnt(self):
+        self.pos -= 1
+        self.consume("RETURN")
+        self.pos += 1 #???
+        if self.lookahead() != "SEMI":
+            val = self.expression()
+        else:
+            val = AstNode("NOP", None)
+        return AstNode("RETURN", val)
 
     def statement(self):
         token = self.tokens[self.pos-1]
@@ -221,7 +236,19 @@ class Parser:
             self.pos -= 1
             return self.assignment()
         elif token.type == 'ID' and lookahead.type == "LPAREN":
-            return self.call_statement()
+            call = self.call_statement()
+            self.consume("SEMI")
+            return call
+        elif token.type == "LPAREN":
+            return self.expression()
+        elif token.type == "RETURN":
+            return self.return_sttmnt()
+        # elif token.type == 'IF':
+        #     self.pos -= 1
+        #     return self.function()
+        # elif token.type == 'WHILE':
+        #     self.pos -= 1
+        #     return self.function()
         elif token.type == 'FUNC':
             self.pos -= 1
             return self.function()
