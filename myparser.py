@@ -130,8 +130,7 @@ class Parser:
         # self.pos += 1
         if self.pos < len(self.tokens) and self.tokens[self.pos].type == 'LPAREN':
             call =  self.call_statement()
-            self.pos += 1
-            return call
+            left = call
         while self.pos < len(self.tokens) and self.tokens[self.pos].type == 'OP':
             op = self.consume('OP')
             other = []
@@ -150,6 +149,9 @@ class Parser:
                         op = 'cond'
             self.pos += 1
             right = self.term()
+            if self.pos < len(self.tokens) and self.tokens[self.pos].type == 'LPAREN':
+                call =  self.call_statement()
+                right = call
             left = AstNode(op, left, right, other)
         self.pos += 1
         return left

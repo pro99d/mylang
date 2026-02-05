@@ -1,6 +1,6 @@
 
 func a(n){
-   return n;
+   return n*n;
 }
 # a();
-print(a(1));
+print(a(10) + a(2+2));
