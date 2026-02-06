@@ -1,6 +1,12 @@
 
 func a(n){
+    if (n == 1){
+        return 0;
+    }else{
+        n = n + 2;
+        return n;
+    }
    return n*n;
 }
 # a();
-print(a(10) + a(2+2));
+print(a(1) + a(2));

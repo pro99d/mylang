@@ -61,12 +61,12 @@ class MyLangInterpreter:
                     for d, id in enumerate(left["args"]):
                         ns.write_value(id.l, right[d])
                     for statement in left['call']:
-                        if statement.op == "RETURN":
-                            return i(statement)
-                        i(statement)
+                        ret = i(statement)
+                        if ret != None:
+                            return ret
 
             case "cond":
-                d = self.conditions[other[0]]
+                d = other[0].value
                 left = i(left)
                 if right:
                     right = i(right)
@@ -75,6 +75,8 @@ class MyLangInterpreter:
                         return left > right
                     case "<":
                         return left < right
+                    case "==":
+                        return left == right
                     case ">=":
                         return left >= right
                     case "<=":
@@ -89,7 +91,6 @@ class MyLangInterpreter:
                         print(f"{RED} Unknown operator: {CLEAR}{d}")
                         exit()
             case "IF":
-                print(right)
                 if i(left):
                     for statement in right:
                         p =  i(statement)

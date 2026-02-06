@@ -145,6 +145,7 @@ class Parser:
                     op = "MUL"
                 case _:
                     if op in [">=", "<=", "==", "<", ">"]:
+
                         other.append(op)
                         op = 'cond'
             self.pos += 1
@@ -161,6 +162,9 @@ class Parser:
         if token.type == 'NUMBER':
             num = token.value
             return AstNode("NUMBER", num)
+        elif token.value == "-" and self.lookahead().type == "NUMBER":
+            self.pos += 1
+            return AstNode("NUMBER", -self.lookahead(-1).value)
         elif token.type == 'STRING':
             return AstNode("STRING", token.value)
         elif token.type == 'ID':
@@ -176,8 +180,9 @@ class Parser:
             # raise SyntaxError("Invalid syntax")
             self.write_error("Invalid syntax")
 
+
     def assignment(self):
-        self.consume('ID')
+        # self.consume('ID')
         var_name = self.consume('ID')
         self.consume('ASSIGN')
         self.pos += 1
@@ -216,7 +221,7 @@ class Parser:
         self.pos += 1
         while self.lookahead().type != "RBRACE":
             instructions.append(self.statement())
-        r = self.consume("RBRACE")
+        self.consume("RBRACE")
         self.pos += 1
         return AstNode("FUNC", name.value, {"type":"ml", "call":instructions, "args":arguments})
     
@@ -230,11 +235,37 @@ class Parser:
             val = AstNode("NOP", None)
         return AstNode("RETURN", val)
 
+    def if_statement(self):
+        self.consume("IF")
+        # print(self.tokens[self.pos].type)
+        self.consume("LPAREN") 
+        self.pos += 1
+        expr = self.expression()
+        expr = AstNode("cond", expr.l, expr.r, [expr.op])
+        self.pos -= 1
+        self.consume("RPAREN")
+        self.consume("LBRACE")
+        instructions = []
+        self.pos += 1
+        while self.lookahead().type != "RBRACE":
+            instructions.append(self.statement())
+        self.consume("RBRACE")
+        else_instr = []
+        if self.lookahead().type == "ELSE":
+            self.consume("ELSE")
+            self.consume("LBRACE")
+            self.pos += 1
+            while self.lookahead().type != "RBRACE":
+                else_instr.append(self.statement())
+            self.consume("RBRACE")
+        self.pos += 1
+        return AstNode("IF", expr, instructions, else_instr)
+
     def statement(self):
         token = self.tokens[self.pos-1]
         lookahead = self.lookahead()
         # print(self.lookahead())
-        if token.type == 'ID' and token.value == 'var':
+        if token.type == 'ID' and self.lookahead().type == "ASSIGN":
             self.pos -= 1
             return self.assignment()
         elif token.type == 'ID' and lookahead.type == "LPAREN":
@@ -245,19 +276,19 @@ class Parser:
             return self.expression()
         elif token.type == "RETURN":
             return self.return_sttmnt()
-        # elif token.type == 'IF':
-        #     self.pos -= 1
-        #     return self.function()
-        # elif token.type == 'WHILE':
-        #     self.pos -= 1
-        #     return self.function()
+        elif token.type == 'IF':
+            self.pos -= 1
+            return self.if_statement()
+        elif token.type == 'WHILE':
+            self.pos -= 1
+            return self.while_statement()
         elif token.type == 'FUNC':
             self.pos -= 1
             return self.function()
         # elif lookahead.type == "OP":
         #     return self.expression()
         else:
-            print(token)
+            print(token, self.lookahead())
             self.write_error("Unknown statement")
 
     def parse(self):
